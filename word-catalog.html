@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>词库目录 - 单词热</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tw.build.css">
+  <style>.c{max-width:375px;margin:0 auto;background:#f7f7f7;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.1)}.s{height:44px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:14px}.n{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #e5e5e5}</style>
+</head>
+<body class="bg-gray-100">
+  <div class="c">
+    <div class="s"><span>9:41</span><span>词库目录</span><span><i class="fas fa-signal text-xs"></i> <i class="fas fa-wifi text-xs"></i> <i class="fas fa-battery-three-quarters text-xs"></i></span></div>
+    <div class="n"><button class="text-gray-600" onclick="safeBack('word-detail.html')"><i class="fas fa-arrow-left text-lg"></i></button><span class="font-semibold text-gray-800" id="libTitle">词库目录</span><div class="w-6"></div></div>
+    <div class="px-4 py-4">
+      <div class="card-brand p-4 mb-4">
+        <div class="font-semibold mb-2">单元列表</div>
+        <div id="units" class="space-y-3"></div>
+      </div>
+      <div class="card-brand p-4 mb-24">
+        <div class="font-semibold mb-2">目录说明</div>
+        <div class="text-sm text-gray-700">每个单元含若干主题词与练习入口，选择任一单元可直接进入对应练习或学习模式选择。</div>
+      </div>
+      <div class="fixed-bottom"><button class="btn-brand w-full" onclick="gotoModes()"><i class="fas fa-list-ul mr-2"></i>进入学习模式选择</button></div>
+    </div>
+  </div>
+  <script>
+    function safeBack(u){if(document.referrer&&document.referrer!==window.location.href){history.back()}else{window.location.href=u||'word-detail.html'}}
+    function qp(k){const p=new URLSearchParams(window.location.search);return p.get(k)||''}
+    const data=[{unit:'Unit 1',topics:['问候','学校'],words:200},{unit:'Unit 2',topics:['家庭','人物'],words:180},{unit:'Unit 3',topics:['动物','自然'],words:220},{unit:'Unit 4',topics:['食物','健康'],words:210}]
+    function render(){const lib=qp('lib')||'中考必备词汇';document.getElementById('libTitle').textContent=lib+' · 目录';const el=document.getElementById('units');el.innerHTML=data.map(d=>`<div class='bg-white rounded-xl p-3 shadow-sm'><div class='flex items-center justify-between'><div><div class='font-semibold'>${d.unit}</div><div class='text-xs text-gray-600'>主题：${d.topics.join('、')} · 约${d.words}词</div></div><div class='flex items-center space-x-2'><button class='chip' onclick='startUnit("${d.unit}","card")'>卡片</button><button class='chip' onclick='startUnit("${d.unit}","quiz")'>选择</button><button class='chip' onclick='startUnit("${d.unit}","spelling")'>拼写</button><button class='chip' onclick='startUnit("${d.unit}","dictation")'>听写</button></div></div></div>`).join('')}
+    function gotoModes(){const lib=qp('lib')||'中考必备词汇';window.location.href='learning-modes.html?lib='+encodeURIComponent(lib)}
+    function startUnit(unit,mode){const lib=qp('lib')||'中考必备词汇';const m={card:'learning.html',quiz:'learning-quiz.html',spelling:'learning-spelling.html',dictation:'learning-dictation.html'}[mode]||'learning.html';window.location.href=m+'?lib='+encodeURIComponent(lib)+'&unit='+encodeURIComponent(unit)+'&total=20'}
+    render()
+  </script>
+</body>
+</html>

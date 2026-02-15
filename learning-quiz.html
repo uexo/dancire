@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词热 - 选择题模式</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tw.build.css">
+    <style>
+        .wechat-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: #f7f7f7;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .wechat-statusbar {
+            height: 44px;
+            background: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-size: 14px;
+        }
+        .wechat-navbar {
+            height: 44px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .option-btn {
+            transition: all 0.3s ease;
+            transform: translateX(0);
+        }
+        .option-btn:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .option-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.02);
+        }
+        .option-btn.correct {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            color: white;
+        }
+        .option-btn.incorrect {
+            background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+            color: white;
+        }
+        .question-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: slideInDown 0.5s ease-out;
+        }
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .timer-circle {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 1s linear;
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="wechat-container">
+        <!-- 状态栏 -->
+        <div class="wechat-statusbar">
+            <span>9:41</span>
+            <span>选择题模式</span>
+            <div class="flex items-center space-x-1">
+                <i class="fas fa-signal text-xs"></i>
+                <i class="fas fa-wifi text-xs"></i>
+                <i class="fas fa-battery-three-quarters text-xs"></i>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="wechat-navbar">
+            <button class="text-gray-600" onclick="safeBack('learning-modes.html')">
+                <i class="fas fa-arrow-left text-lg"></i>
+            </button>
+            <div class="flex items-center space-x-2">
+                <span id="libTitle" class="text-sm text-gray-600">中考必备词汇</span>
+                <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs" id="progressText">1/20</span>
+            </div>
+            <button class="text-gray-600" onclick="pauseQuiz()">
+                <i class="fas fa-pause text-lg"></i>
+            </button>
+        </div>
+
+        <!-- 进度条和计时器 -->
+        <div class="px-4 py-3 bg-white border-b border-gray-200">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-600">答题进度</span>
+                    <span class="text-sm font-semibold text-green-600" id="progressPercent">5%</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="relative w-8 h-8">
+                        <svg class="w-8 h-8 transform -rotate-90">
+                            <circle cx="16" cy="16" r="14" stroke="#e5e7eb" stroke-width="2" fill="none"></circle>
+                            <circle cx="16" cy="16" r="14" stroke="#f59e0b" stroke-width="2" fill="none" 
+                                    class="timer-circle" stroke-linecap="round" id="timerCircle"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-xs font-bold text-orange-600" id="timerText">15</span>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-500">秒</span>
+                </div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500" 
+                     style="width: 5%" id="progressBar"></div>
+            </div>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="flex-1 px-4 py-6">
+            <!-- 题目卡片 -->
+            <div class="text-white rounded-xl p-6 mb-6 text-center brand-gradient">
+                <div class="mb-4">
+                    <button class="bg-white/20 backdrop-blur-sm rounded-full p-3 mb-4" onclick="playPronunciation()">
+                        <i class="fas fa-volume-up text-xl"></i>
+                    </button>
+                    <h1 class="text-3xl font-bold mb-2" id="questionWord">Adventure</h1>
+                    <p class="text-white/80 text-lg" id="pronunciation">/ədˈventʃər/</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-lg p-3">
+                    <p class="text-sm text-white/80 mb-1">请选择正确的中文意思</p>
+                </div>
+            </div>
+
+            <!-- 选项列表 -->
+            <div class="space-y-3 mb-6" id="optionsContainer">
+                <button class="option-btn w-full bg-white rounded-xl p-4 text-left shadow-sm border-2 border-transparent" 
+                        onclick="selectOption(0)" data-option="0">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold">A</div>
+                            <span class="text-gray-800">冒险；奇遇</span>
+                        </div>
+                        <i class="fas fa-circle text-gray-300"></i>
+                    </div>
+                </button>
+                
+                <button class="option-btn w-full bg-white rounded-xl p-4 text-left shadow-sm border-2 border-transparent" 
+                        onclick="selectOption(1)" data-option="1">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-semibold">B</div>
+                            <span class="text-gray-800">建议；劝告</span>
+                        </div>
+                        <i class="fas fa-circle text-gray-300"></i>
+                    </div>
+                </button>
+                
+                <button class="option-btn w-full bg-white rounded-xl p-4 text-left shadow-sm border-2 border-transparent" 
+                        onclick="selectOption(2)" data-option="2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-semibold">C</div>
+                            <span class="text-gray-800">优势；好处</span>
+                        </div>
+                        <i class="fas fa-circle text-gray-300"></i>
+                    </div>
+                </button>
+                
+                <button class="option-btn w-full bg-white rounded-xl p-4 text-left shadow-sm border-2 border-transparent" 
+                        onclick="selectOption(3)" data-option="3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-semibold">D</div>
+                            <span class="text-gray-800">广告；宣传</span>
+                        </div>
+                        <i class="fas fa-circle text-gray-300"></i>
+                    </div>
+                </button>
+            </div>
+
+            <!-- 提示信息 -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4" id="hintBox" style="display: none;">
+                <div class="flex items-center">
+                    <i class="fas fa-lightbulb text-blue-500 mr-2"></i>
+                    <span class="text-sm text-blue-700" id="hintText">记忆提示：ad(向) + venture(冒险) = 向前冒险</span>
+                </div>
+            </div>
+
+            <!-- 确认按钮 -->
+            <button class="w-full btn-brand text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50" 
+                    id="confirmBtn" onclick="confirmAnswer()" disabled>
+                <i class="fas fa-check mr-2"></i>
+                确认答案
+            </button>
+        </div>
+
+        <!-- 答题统计 -->
+        <div class="fixed bottom-4 right-4 bg-white rounded-xl p-3 shadow-lg">
+            <div class="flex items-center space-x-3 text-sm">
+                <div class="flex items-center space-x-1">
+                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span class="text-gray-600" id="correctCount">0</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span class="text-gray-600" id="incorrectCount">0</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <i class="fas fa-clock text-gray-400"></i>
+                    <span class="text-gray-600" id="totalTime">00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果弹窗 -->
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" id="resultModal" style="display: none;">
+            <div class="bg-white rounded-xl p-6 mx-4 max-w-sm w-full">
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" id="resultIcon">
+                        <i class="fas fa-check text-3xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2" id="resultTitle">回答正确！</h3>
+                    <p class="text-gray-600 mb-4" id="resultMessage">太棒了，继续保持！</p>
+                    <div class="bg-gray-50 rounded-lg p-3 mb-4" id="explanationBox">
+                        <p class="text-sm text-gray-700" id="explanationText">Adventure 意为"冒险；奇遇"</p>
+                    </div>
+                    <button class="w-full btn-brand text-white py-3 rounded-xl font-semibold" 
+                            onclick="nextQuestion()">
+                        下一题
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 查询参数与安全返回
+        function getQueryParam(key) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(key);
+        }
+        function safeBack(fallbackUrl) {
+            if (document.referrer && document.referrer !== window.location.href) {
+                history.back();
+            } else {
+                window.location.href = fallbackUrl || 'learning-modes.html';
+            }
+        }
+        let currentQuestionIndex = 0;
+        let selectedOption = null;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let timer = 15;
+        let timerInterval = null;
+        let startTime = Date.now();
+        let totalQuestions = 20;
+
+        // 通过 URL 参数设置词库标题与总数
+        const libFromUrl = getQueryParam('lib');
+        if (libFromUrl) {
+            const libTitleEl = document.getElementById('libTitle');
+            if (libTitleEl) libTitleEl.textContent = libFromUrl;
+        }
+        const totalParam = parseInt(getQueryParam('total') || '', 10);
+        if (!isNaN(totalParam)) {
+            totalQuestions = totalParam;
+            const progressEl = document.getElementById('progressText');
+            if (progressEl) progressEl.textContent = `1/${totalQuestions}`;
+        }
+        
+        const questions = [
+            {
+                word: "Adventure",
+                pronunciation: "/ədˈventʃər/",
+                options: ["冒险；奇遇", "建议；劝告", "优势；好处", "广告；宣传"],
+                correct: 0,
+                hint: "ad(向) + venture(冒险) = 向前冒险"
+            },
+            {
+                word: "Beautiful",
+                pronunciation: "/ˈbjuːtɪfl/",
+                options: ["勇敢的", "美丽的", "有用的", "小心的"],
+                correct: 1,
+                hint: "beauty(美丽) + ful(充满) = 充满美丽的"
+            },
+            {
+                word: "Challenge",
+                pronunciation: "/ˈtʃælɪndʒ/",
+                options: ["改变", "选择", "挑战", "机会"],
+                correct: 2,
+                hint: "来自法语，原意为'指控'"
+            },
+            {
+                word: "Develop",
+                pronunciation: "/dɪˈveləp/",
+                options: ["决定", "发展", "描述", "发现"],
+                correct: 1,
+                hint: "de(去掉) + velop(包裹) = 去掉包裹，展开发展"
+            },
+            {
+                word: "Education",
+                pronunciation: "/ˌedʒuˈkeɪʃn/",
+                options: ["教育", "经济", "选举", "紧急情况"],
+                correct: 0,
+                hint: "e(出) + duc(引导) + ation(名词后缀) = 引导出来"
+            }
+        ];
+
+        function startTimer() {
+            timer = 15;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timer--;
+                updateTimerDisplay();
+                
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    timeUp();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timerText').textContent = timer;
+            const circle = document.getElementById('timerCircle');
+            const circumference = 2 * Math.PI * 14;
+            const offset = circumference - (timer / 15) * circumference;
+            circle.style.strokeDashoffset = offset;
+            
+            // 时间紧急时添加脉冲效果
+            if (timer <= 5) {
+                document.getElementById('timerText').classList.add('pulse');
+            } else {
+                document.getElementById('timerText').classList.remove('pulse');
+            }
+        }
+
+        function selectOption(optionIndex) {
+            if (selectedOption !== null) return; // 防止重复选择
+            
+            // 移除所有选项的选中状态
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                btn.querySelector('i').className = 'fas fa-circle text-gray-300';
+            });
+            
+            // 添加选中状态
+            const selectedBtn = document.querySelector(`[data-option="${optionIndex}"]`);
+            selectedBtn.classList.add('selected');
+            selectedBtn.querySelector('i').className = 'fas fa-check-circle text-white';
+            
+            selectedOption = optionIndex;
+            
+            // 启用确认按钮
+            document.getElementById('confirmBtn').disabled = false;
+            
+            // 停止计时器
+            clearInterval(timerInterval);
+        }
+
+        function confirmAnswer() {
+            if (selectedOption === null) return;
+            
+            const currentQuestion = questions[currentQuestionIndex];
+            const isCorrect = selectedOption === currentQuestion.correct;
+            
+            // 显示所有选项的正确性
+            document.querySelectorAll('.option-btn').forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === currentQuestion.correct) {
+                    btn.classList.add('correct');
+                    btn.querySelector('i').className = 'fas fa-check-circle text-white';
+                } else if (index === selectedOption && !isCorrect) {
+                    btn.classList.add('incorrect');
+                    btn.querySelector('i').className = 'fas fa-times-circle text-white';
+                }
+            });
+            
+            // 显示提示
+            document.getElementById('hintBox').style.display = 'block';
+            document.getElementById('hintText').textContent = `记忆提示：${currentQuestion.hint}`;
+            
+            // 更新统计
+            if (isCorrect) {
+                correctAnswers++;
+                document.getElementById('correctCount').textContent = correctAnswers;
+            } else {
+                incorrectAnswers++;
+                document.getElementById('incorrectCount').textContent = incorrectAnswers;
+            }
+            
+            // 显示结果弹窗
+            setTimeout(() => {
+                showResult(isCorrect);
+            }, 1500);
+        }
+
+        function showResult(isCorrect) {
+            const modal = document.getElementById('resultModal');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const message = document.getElementById('resultMessage');
+            const explanation = document.getElementById('explanationText');
+            
+            if (isCorrect) {
+                icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-green-500';
+                icon.innerHTML = '<i class="fas fa-check text-3xl text-white"></i>';
+                title.textContent = '回答正确！';
+                message.textContent = '太棒了，继续保持！';
+            } else {
+                icon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-red-500';
+                icon.innerHTML = '<i class="fas fa-times text-3xl text-white"></i>';
+                title.textContent = '回答错误';
+                message.textContent = '没关系，继续努力！';
+            }
+            
+            const currentQuestion = questions[currentQuestionIndex];
+            explanation.textContent = `${currentQuestion.word} 的正确意思是"${currentQuestion.options[currentQuestion.correct]}"`;
+            
+            modal.style.display = 'flex';
+        }
+
+        function nextQuestion() {
+            document.getElementById('resultModal').style.display = 'none';
+            
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex >= questions.length) {
+                showFinalResult();
+                return;
+            }
+            
+            // 重置界面
+            resetQuestion();
+            updateQuestion();
+            startTimer();
+        }
+
+        function resetQuestion() {
+            selectedOption = null;
+            
+            // 重置选项按钮
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.className = 'option-btn w-full bg-white rounded-xl p-4 text-left shadow-sm border-2 border-transparent';
+                btn.querySelector('i').className = 'fas fa-circle text-gray-300';
+            });
+            
+            // 重置确认按钮
+            document.getElementById('confirmBtn').disabled = true;
+            
+            // 隐藏提示
+            document.getElementById('hintBox').style.display = 'none';
+        }
+
+        function updateQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            // 更新题目
+            document.getElementById('questionWord').textContent = question.word;
+            document.getElementById('pronunciation').textContent = question.pronunciation;
+            
+            // 更新选项
+            const options = document.querySelectorAll('.option-btn span');
+            options.forEach((option, index) => {
+                option.textContent = question.options[index];
+            });
+            
+            // 更新进度
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            document.getElementById('progressText').textContent = `${currentQuestionIndex + 1}/${totalQuestions}`;
+            document.getElementById('progressPercent').textContent = `${Math.round(progress)}%`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            // 添加动画
+            document.querySelector('.question-card').classList.add('bounce-in');
+            setTimeout(() => {
+                document.querySelector('.question-card').classList.remove('bounce-in');
+            }, 600);
+        }
+
+        function timeUp() {
+            // 自动选择错误答案（如果没有选择）
+            if (selectedOption === null) {
+                const wrongOptions = [0, 1, 2, 3].filter(i => i !== questions[currentQuestionIndex].correct);
+                selectedOption = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+                
+                // 添加震动效果
+                document.querySelector('.question-card').classList.add('shake');
+                setTimeout(() => {
+                    document.querySelector('.question-card').classList.remove('shake');
+                }, 500);
+            }
+            
+            confirmAnswer();
+        }
+
+        function playPronunciation() {
+            const btn = event.currentTarget;
+            btn.style.transform = 'scale(0.95)';
+            
+            // 模拟发音
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(questions[currentQuestionIndex].word);
+                utterance.lang = 'en-US';
+                speechSynthesis.speak(utterance);
+            }
+            
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 200);
+        }
+
+        function pauseQuiz() {
+            clearInterval(timerInterval);
+            // 这里可以添加暂停弹窗
+            alert('测试已暂停');
+        }
+
+        function showFinalResult() {
+            const accuracy = Math.round((correctAnswers / questions.length) * 100);
+            const totalTime = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            
+            alert(`测试完成！\n正确率：${accuracy}%\n用时：${minutes}:${seconds.toString().padStart(2, '0')}`);
+        }
+
+        function updateTotalTime() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('totalTime').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // 初始化
+        updateQuestion();
+        startTimer();
+        setInterval(updateTotalTime, 1000);
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'KeyA') selectOption(0);
+            else if (e.code === 'KeyB') selectOption(1);
+            else if (e.code === 'KeyC') selectOption(2);
+            else if (e.code === 'KeyD') selectOption(3);
+            else if (e.code === 'Enter') confirmAnswer();
+        });
+    </script>
+</body>
+</html>

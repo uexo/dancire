@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词热 - 高保真交互原型展示</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tw.build.css">
+    <style>
+        .prototype-frame {
+            width: 375px;
+            height: 812px;
+            border: 8px solid #1f2937;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: #000;
+            position: relative;
+        }
+        .prototype-frame::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: #374151;
+            border-radius: 2px;
+            z-index: 10;
+        }
+        .prototype-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .prototype-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .prototype-item:nth-child(1) { animation-delay: 0.1s; }
+        .prototype-item:nth-child(2) { animation-delay: 0.2s; }
+        .prototype-item:nth-child(3) { animation-delay: 0.3s; }
+        .prototype-item:nth-child(4) { animation-delay: 0.4s; }
+        .prototype-item:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .prototype-info {
+            margin-bottom: 1.5rem;
+            text-align: center;
+            max-width: 375px;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 20;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+            padding: 0 2rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 导航按钮 -->
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="scrollToSection('hero')">
+            <i class="fas fa-home mr-2"></i>首页
+        </button>
+        <button class="nav-btn" onclick="scrollToSection('prototypes')">
+            <i class="fas fa-mobile-alt mr-2"></i>原型
+        </button>
+        <button class="nav-btn" onclick="scrollToSection('features')">
+            <i class="fas fa-star mr-2"></i>特性
+        </button>
+    </div>
+
+    <!-- 英雄区域 -->
+    <section id="hero" class="hero-section">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-5xl font-bold mb-6">单词热</h1>
+            <p class="text-xl mb-4 opacity-90">让英语学习更简单、更有趣的智能单词学习应用</p>
+            <p class="text-lg opacity-80 mb-8">基于科学记忆算法，为不同年龄段用户提供个性化学习体验</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                    <i class="fas fa-brain text-3xl mb-4"></i>
+                    <h3 class="text-lg font-semibold mb-2">智能算法</h3>
+                    <p class="text-sm opacity-80">基于艾宾浩斯遗忘曲线的科学记忆算法</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                    <i class="fas fa-users text-3xl mb-4"></i>
+                    <h3 class="text-lg font-semibold mb-2">全龄段覆盖</h3>
+                    <p class="text-sm opacity-80">从小学到成人，满足不同学习需求</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                    <i class="fas fa-gamepad text-3xl mb-4"></i>
+                    <h3 class="text-lg font-semibold mb-2">游戏化学习</h3>
+                    <p class="text-sm opacity-80">趣味互动，让学习变成一种享受</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 原型展示区域 -->
+    <section id="prototypes" class="py-12">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">高保真交互原型</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                以下是"单词热"微信小程序的核心界面原型，展示了完整的用户学习流程和交互体验
+            </p>
+        </div>
+
+        <div class="prototype-container">
+            <!-- 登录注册界面 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-sign-in-alt text-blue-500 mr-2"></i>
+                        登录注册
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        用户首次进入应用的登录注册流程，支持微信一键登录和手机号注册
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>微信授权登录</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>手机验证码</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>隐私保护</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-1">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载登录界面...</p>
+                    </div>
+                    <iframe src="login.html" width="100%" height="100%" frameborder="0" onload="hideLoading(1)"></iframe>
+                </div>
+            </div>
+
+            <!-- 新手引导界面 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-route text-purple-500 mr-2"></i>
+                        新手引导
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        帮助新用户快速了解应用功能，设置个人学习偏好和目标
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>年级选择</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>目标设定</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>个性化配置</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-2">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载引导界面...</p>
+                    </div>
+                    <iframe src="onboarding.html" width="100%" height="100%" frameborder="0" onload="hideLoading(2)"></iframe>
+                </div>
+            </div>
+
+            <!-- 首页界面 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-home text-green-500 mr-2"></i>
+                        应用首页
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        展示学习进度、每日任务、推荐内容和快速操作入口
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>学习统计</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>进度跟踪</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>成就系统</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-3">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载首页界面...</p>
+                    </div>
+                    <iframe src="home.html" width="100%" height="100%" frameborder="0" onload="hideLoading(3)"></iframe>
+                </div>
+            </div>
+
+            <!-- 学习中心 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-graduation-cap text-blue-500 mr-2"></i>
+                        学习中心
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        统一的学习入口，整合所有学习模式选择，简化用户操作流程
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>继续学习</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>模式选择</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>学习设置</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>统计数据</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-4">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载学习中心...</p>
+                    </div>
+                    <iframe src="learning-main.html" width="100%" height="100%" frameborder="0" onload="hideLoading(4)"></iframe>
+                </div>
+            </div>
+
+            <!-- 卡片学习模式 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-clone text-purple-500 mr-2"></i>
+                        卡片学习模式
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        翻转卡片记忆法，图像化单词学习，支持游戏角色记忆
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>卡片翻转</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>图像记忆</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>游戏角色</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>进度追踪</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-5">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载学习界面...</p>
+                    </div>
+                    <iframe src="learning.html" width="100%" height="100%" frameborder="0" onload="hideLoading(5)"></iframe>
+                </div>
+            </div>
+
+            <!-- 学习模式选择 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-list-ul text-blue-500 mr-2"></i>
+                        学习模式选择
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        多种学习模式，个性化学习体验，智能推荐最适合的学习方式
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>卡片模式</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>选择题</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>拼写练习</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>听写模式</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-10">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载学习模式...</p>
+                    </div>
+                    <iframe src="learning-modes.html" width="100%" height="100%" frameborder="0" onload="hideLoading(10)"></iframe>
+                </div>
+            </div>
+
+            <!-- 选择题模式 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-question-circle text-green-500 mr-2"></i>
+                        选择题模式
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        多选题练习，智能干扰项生成，提升单词辨识能力
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>智能选项</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>即时反馈</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>错误分析</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>正确率统计</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-6">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载选择题模式...</p>
+                    </div>
+                    <iframe src="learning-quiz.html" width="100%" height="100%" frameborder="0" onload="hideLoading(6)"></iframe>
+                </div>
+            </div>
+
+            <!-- 拼写练习模式 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-keyboard text-indigo-500 mr-2"></i>
+                        拼写练习模式
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        键盘输入练习，支持提示功能，强化单词拼写记忆
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>智能提示</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>错误纠正</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>拼写检查</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>准确率统计</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-7">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载拼写练习...</p>
+                    </div>
+                    <iframe src="learning-spelling.html" width="100%" height="100%" frameborder="0" onload="hideLoading(7)"></iframe>
+                </div>
+            </div>
+
+            <!-- 听写模式 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-headphones text-pink-500 mr-2"></i>
+                        听写模式
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        听音写词练习，提升听力理解和拼写能力的综合训练
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>语音播放</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>重复播放</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>语速调节</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>听写准确率</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-8">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载听写模式...</p>
+                    </div>
+                    <iframe src="learning-dictation.html" width="100%" height="100%" frameborder="0" onload="hideLoading(8)"></iframe>
+                </div>
+            </div>
+
+            <!-- 智能混合模式 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-random text-purple-500 mr-2"></i>
+                        智能混合模式
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        根据学习表现动态切换题型（卡片/选择题/拼写/听写），提升综合掌握度
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>自适应题型</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>即时反馈</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>进度联动</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-12">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载智能混合...</p>
+                    </div>
+                    <iframe src="learning-mixed.html" width="100%" height="100%" frameborder="0" onload="hideLoading(12)"></iframe>
+                </div>
+            </div>
+
+            <!-- 词库选择界面 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-book text-teal-500 mr-2"></i>
+                        词库选择
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        丰富的词库分类，支持教材同步、主题分类和AI智能推荐
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>教材同步</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>主题分类</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>AI推荐</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>分级词库</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-9">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载词库选择...</p>
+                    </div>
+                    <iframe src="word-library.html" width="100%" height="100%" frameborder="0" onload="hideLoading(9)"></iframe>
+                </div>
+            </div>
+
+            <!-- 词库详情 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-info-circle text-teal-500 mr-2"></i>
+                        词库详情
+                    </h3>
+                    <p class="text-gray-600 mb-4">词库信息、示例词与练习入口，直达学习模式</p>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-23">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载词库详情...</p>
+                    </div>
+                    <iframe src="word-detail.html" width="100%" height="100%" frameborder="0" onload="hideLoading(23)"></iframe>
+                </div>
+            </div>
+
+            <!-- 词库目录 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-list-ul text-blue-500 mr-2"></i>
+                        词库目录
+                    </h3>
+                    <p class="text-gray-600 mb-4">单元与主题列表，直接进入对应练习或模式</p>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-24">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载词库目录...</p>
+                    </div>
+                    <iframe src="word-catalog.html" width="100%" height="100%" frameborder="0" onload="hideLoading(24)"></iframe>
+                </div>
+            </div>
+
+
+
+            <!-- 个人中心界面 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-user-circle text-indigo-500 mr-2"></i>
+                        个人中心
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        用户信息管理、学习统计、成就展示和应用设置
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>个人资料</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>学习报告</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>设置管理</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-11">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载个人中心...</p>
+                    </div>
+                    <iframe src="profile.html" width="100%" height="100%" frameborder="0" onload="hideLoading(11)"></iframe>
+                </div>
+            </div>
+
+            <!-- 家长监督面板 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-user-shield text-green-500 mr-2"></i>
+                        家长监督面板
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        学习概览、错词分布与建议、家长控制项设置，提升家校互通
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>趋势概览</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>错词分析</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>提醒与屏蔽</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-14">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载监督面板...</p>
+                    </div>
+                    <iframe src="parent-supervision.html" width="100%" height="100%" frameborder="0" onload="hideLoading(14)"></iframe>
+                </div>
+            </div>
+
+            <!-- 设置中心 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-cog text-blue-500 mr-2"></i>
+                        设置中心
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        学习数量、发音语速与自动播放等偏好管理，联动学习中心
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>数量选择</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>语速滑条</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>自动播放</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-15">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载设置中心...</p>
+                    </div>
+                    <iframe src="settings.html" width="100%" height="100%" frameborder="0" onload="hideLoading(15)"></iframe>
+                </div>
+            </div>
+
+            <!-- 订阅页面 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-crown text-yellow-500 mr-2"></i>
+                        会员订阅
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        会员特权展示、订阅方案选择和支付流程
+                    </p>
+                    <div class="flex justify-center space-x-4 text-sm text-gray-500">
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>特权展示</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>方案选择</span>
+                        <span><i class="fas fa-check text-green-500 mr-1"></i>支付流程</span>
+                    </div>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-13">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载订阅页面...</p>
+                    </div>
+                    <iframe src="subscription.html" width="100%" height="100%" frameborder="0" onload="hideLoading(13)"></iframe>
+                </div>
+            </div>
+
+            <!-- 学习计划 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
+                        学习计划
+                    </h3>
+                    <p class="text-gray-600 mb-4">目标词数与每日新词设置，展示预计完成时间</p>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-20">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载学习计划...</p>
+                    </div>
+                    <iframe src="study-plan.html" width="100%" height="100%" frameborder="0" onload="hideLoading(20)"></iframe>
+                </div>
+            </div>
+
+            <!-- 生词本 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-bookmark text-indigo-500 mr-2"></i>
+                        生词本
+                    </h3>
+                    <p class="text-gray-600 mb-4">收藏词条列表，支持预览、移除与复习</p>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-21">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载生词本...</p>
+                    </div>
+                    <iframe src="word-book.html" width="100%" height="100%" frameborder="0" onload="hideLoading(21)"></iframe>
+                </div>
+            </div>
+            <!-- 学习统计总览 -->
+            <div class="prototype-item">
+                <div class="prototype-info">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-chart-pie text-teal-500 mr-2"></i>
+                        学习统计总览
+                    </h3>
+                    <p class="text-gray-600 mb-4">本周关键指标与趋势、题型分布</p>
+                </div>
+                <div class="prototype-frame">
+                    <div class="loading-overlay" id="loading-22">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载统计总览...</p>
+                    </div>
+                    <iframe src="stats-overview.html" width="100%" height="100%" frameborder="0" onload="hideLoading(22)"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特性介绍 -->
+    <section id="features" class="py-12 bg-white">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">设计特色</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                遵循微信小程序设计规范，注重用户体验和视觉美感
+            </p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="fas fa-mobile-alt text-4xl text-blue-500 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">微信小程序风格</h3>
+                <p class="text-gray-600">严格遵循微信小程序设计规范，包含标准的状态栏、导航栏和标签栏设计</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-palette text-4xl text-purple-500 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">现代化UI设计</h3>
+                <p class="text-gray-600">采用渐变色彩、圆角设计和阴影效果，营造现代、清新的视觉体验</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-magic text-4xl text-green-500 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">丰富交互动画</h3>
+                <p class="text-gray-600">卡片翻转、按钮反馈、进度动画等多种交互效果，提升用户参与感</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-images text-4xl text-orange-500 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">真实内容填充</h3>
+                <p class="text-gray-600">使用Unsplash高质量图片和真实文案，避免占位符，展现真实应用效果</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-code text-4xl text-red-500 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">技术栈</h3>
+                <p class="text-gray-600">HTML5 + Tailwind CSS + FontAwesome，代码结构清晰，易于开发转换</p>
+            </div>
+            
+            <div class="feature-card">
+                <i class="fas fa-rocket text-4xl text-indigo-500 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">高保真还原</h3>
+                <p class="text-gray-600">像素级精确还原设计稿，为开发团队提供最权威的视觉和交互蓝本</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h3 class="text-2xl font-bold mb-4">单词热 - 高保真交互原型</h3>
+            <p class="text-gray-400 mb-4">基于产品需求文档(PRD)和用户故事地图创建的完整原型展示</p>
+            <div class="flex justify-center space-x-6 text-sm mb-4">
+                <span><i class="fas fa-check text-green-400 mr-1"></i>微信小程序风格</span>
+                <span><i class="fas fa-check text-green-400 mr-1"></i>响应式设计</span>
+                <span><i class="fas fa-check text-green-400 mr-1"></i>交互动画</span>
+                <span><i class="fas fa-check text-green-400 mr-1"></i>真实内容</span>
+            </div>
+            <div class="text-gray-400 text-sm">
+                <p>包含 <span class="text-green-400 font-semibold">21个</span> 核心界面原型 | 
+                   采用 <span class="text-blue-400 font-semibold">HTML5 + Tailwind CSS + FontAwesome</span> 技术栈</p>
+                <p class="mt-2">涵盖用户注册、学习流程、会员订阅等完整功能模块</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 隐藏加载动画
+        function hideLoading(id) {
+            setTimeout(() => {
+                const loading = document.getElementById(`loading-${id}`);
+                if (loading) {
+                    loading.style.opacity = '0';
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                    }, 500);
+                }
+            }, 1000);
+        }
+
+        // 平滑滚动到指定区域
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加滚动监听，实现导航按钮高亮
+            window.addEventListener('scroll', function() {
+                const sections = ['hero', 'prototypes', 'features'];
+                const navButtons = document.querySelectorAll('.nav-btn');
+                
+                let currentSection = '';
+                sections.forEach(section => {
+                    const element = document.getElementById(section);
+                    if (element) {
+                        const rect = element.getBoundingClientRect();
+                        if (rect.top <= 100 && rect.bottom >= 100) {
+                            currentSection = section;
+                        }
+                    }
+                });
+                
+                // 更新按钮状态（这里可以添加高亮逻辑）
+            });
+
+            // 添加页面加载进度提示
+            console.log('单词热原型展示页面加载完成');
+            console.log('包含界面：登录注册、新手引导、首页、学习中心、多种学习模式、智能混合、词库选择、词库详情、词库目录、个人中心、家长监督、设置中心、学习报告、错题本、成就中心、社交中心、学习计划、生词本、学习统计总览、会员订阅');
+            console.log('界面总数：21个核心界面原型');
+            console.log('技术栈：HTML5 + Tailwind CSS + FontAwesome');
+            console.log('设计风格：微信小程序风格，支持游戏化学习体验');
+        });
+
+        // 添加键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'h' || e.key === 'H') {
+                scrollToSection('hero');
+            } else if (e.key === 'p' || e.key === 'P') {
+                scrollToSection('prototypes');
+            } else if (e.key === 'f' || e.key === 'F') {
+                scrollToSection('features');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单词测试 - 单词热</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 微信小程序风格样式 */
+        .miniprogram-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: #f7f7f7;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 0 15px;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #4ade80;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            margin: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .word-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .phonetic {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .option-button {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 8px 15px;
+            text-align: left;
+            font-size: 16px;
+            color: #374151;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .option-button:hover {
+            border-color: #667eea;
+            background: #f8faff;
+        }
+        
+        .option-button.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .option-button.correct {
+            border-color: #10b981;
+            background: #10b981;
+            color: white;
+        }
+        
+        .option-button.incorrect {
+            border-color: #ef4444;
+            background: #ef4444;
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            gap: 15px;
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            flex: 2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+        }
+        
+        .timer {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .stats-bar {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        
+        .bottom-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 375px;
+            height: 60px;
+            background: white;
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .tab-item.active {
+            color: #667eea;
+        }
+        
+        .tab-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .result-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .result-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 20px;
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .result-modal.show .result-content {
+            transform: scale(1);
+        }
+        
+        .result-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .result-icon.correct {
+            color: #10b981;
+        }
+        
+        .result-icon.incorrect {
+            color: #ef4444;
+        }
+        
+        .explanation {
+            background: #f8faff;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+        }
+        
+        .explanation-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .explanation-text {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="miniprogram-container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div class="flex items-center">
+                <i class="fas fa-signal text-sm mr-1"></i>
+                <i class="fas fa-wifi text-sm mr-1"></i>
+                <i class="fas fa-battery-three-quarters text-sm"></i>
+            </div>
+            <div class="font-medium">9:41</div>
+            <div class="flex items-center">
+                <span class="text-xs mr-1">100%</span>
+                <i class="fas fa-battery-full text-sm"></i>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="nav-bar">
+            <div class="flex items-center">
+                <i class="fas fa-arrow-left mr-3 cursor-pointer" onclick="goBack()"></i>
+                <span>单词测试</span>
+            </div>
+            <div class="timer">
+                <i class="fas fa-clock mr-1"></i>
+                <span id="timer">05:00</span>
+            </div>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="px-5 py-3 bg-white">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-gray-600">进度</span>
+                <span class="text-sm font-semibold text-blue-600" id="progress-text">3/10</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 30%"></div>
+            </div>
+        </div>
+
+        <!-- 统计栏 -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number text-green-600" id="correct-count">2</div>
+                <div class="stat-label">正确</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number text-red-600" id="incorrect-count">1</div>
+                <div class="stat-label">错误</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number text-blue-600" id="accuracy">67%</div>
+                <div class="stat-label">准确率</div>
+            </div>
+        </div>
+
+        <!-- 题目卡片 -->
+        <div class="question-card">
+            <div class="word-display" id="word-display">abandon</div>
+            <div class="phonetic" id="phonetic">/əˈbændən/</div>
+            <button class="btn-secondary mb-4" onclick="playPronunciation()">
+                <i class="fas fa-volume-up mr-2"></i>
+                听发音
+            </button>
+            <div class="text-left">
+                <p class="text-sm text-gray-600 mb-3">请选择正确的中文释义：</p>
+            </div>
+        </div>
+
+        <!-- 选项 -->
+        <div class="pb-24">
+            <div class="option-button" onclick="selectOption(0)" data-option="0">
+                A. 放弃，抛弃
+            </div>
+            <div class="option-button" onclick="selectOption(1)" data-option="1">
+                B. 获得，取得
+            </div>
+            <div class="option-button" onclick="selectOption(2)" data-option="2">
+                C. 接受，承认
+            </div>
+            <div class="option-button" onclick="selectOption(3)" data-option="3">
+                D. 避免，回避
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-buttons" style="position: fixed; bottom: 60px; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb;">
+            <button class="btn-secondary" onclick="skipQuestion()">
+                <i class="fas fa-forward mr-2"></i>
+                跳过
+            </button>
+            <button class="btn-primary" id="submit-btn" onclick="submitAnswer()" disabled>
+                <i class="fas fa-check mr-2"></i>
+                提交答案
+            </button>
+        </div>
+
+        <!-- 底部标签栏 -->
+        <div class="bottom-tabs">
+            <div class="tab-item" onclick="switchTab('home')">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('study')">
+                <i class="fas fa-book"></i>
+                <span>学习</span>
+            </div>
+            <div class="tab-item active" onclick="switchTab('test')">
+                <i class="fas fa-clipboard-check"></i>
+                <span>测试</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('profile')">
+                <i class="fas fa-user"></i>
+                <span>我的</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div class="result-modal" id="result-modal">
+        <div class="result-content">
+            <div class="result-icon" id="result-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2" id="result-title">回答正确！</h3>
+            <p class="text-gray-600 mb-4" id="result-message">太棒了，继续保持！</p>
+            
+            <div class="explanation">
+                <div class="explanation-title">单词解析</div>
+                <div class="explanation-text" id="explanation-text">
+                    abandon /əˈbændən/ v. 放弃，抛弃<br>
+                    例句：He abandoned his car in the snow.
+                </div>
+            </div>
+            
+            <button class="btn-primary w-full" onclick="nextQuestion()">
+                <i class="fas fa-arrow-right mr-2"></i>
+                下一题
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 测试数据
+        const questions = [
+            {
+                word: "abandon",
+                phonetic: "/əˈbændən/",
+                options: ["放弃，抛弃", "获得，取得", "接受，承认", "避免，回避"],
+                correct: 0,
+                explanation: "abandon /əˈbændən/ v. 放弃，抛弃\n例句：He abandoned his car in the snow."
+            },
+            {
+                word: "ability",
+                phonetic: "/əˈbɪləti/",
+                options: ["能力，才能", "责任，义务", "机会，时机", "困难，障碍"],
+                correct: 0,
+                explanation: "ability /əˈbɪləti/ n. 能力，才能\n例句：She has the ability to learn quickly."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let selectedOption = -1;
+        let correctCount = 2;
+        let incorrectCount = 1;
+        let timeLeft = 300; // 5分钟
+
+        // 初始化
+        function init() {
+            loadQuestion();
+            startTimer();
+            updateStats();
+        }
+
+        // 加载题目
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('word-display').textContent = question.word;
+            document.getElementById('phonetic').textContent = question.phonetic;
+            
+            const options = document.querySelectorAll('.option-button');
+            options.forEach((option, index) => {
+                option.textContent = String.fromCharCode(65 + index) + '. ' + question.options[index];
+                option.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            selectedOption = -1;
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').style.opacity = '0.5';
+        }
+
+        // 选择选项
+        function selectOption(index) {
+            // 清除之前的选择
+            document.querySelectorAll('.option-button').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // 选中当前选项
+            document.querySelectorAll('.option-button')[index].classList.add('selected');
+            selectedOption = index;
+            
+            // 启用提交按钮
+            document.getElementById('submit-btn').disabled = false;
+            document.getElementById('submit-btn').style.opacity = '1';
+        }
+
+        // 提交答案
+        function submitAnswer() {
+            if (selectedOption === -1) return;
+            
+            const question = questions[currentQuestion];
+            const isCorrect = selectedOption === question.correct;
+            
+            // 显示正确答案
+            const options = document.querySelectorAll('.option-button');
+            options[question.correct].classList.add('correct');
+            
+            if (!isCorrect) {
+                options[selectedOption].classList.add('incorrect');
+                incorrectCount++;
+            } else {
+                correctCount++;
+            }
+            
+            // 更新统计
+            updateStats();
+            
+            // 显示结果弹窗
+            showResult(isCorrect, question.explanation);
+        }
+
+        // 显示结果
+        function showResult(isCorrect, explanation) {
+            const modal = document.getElementById('result-modal');
+            const icon = document.getElementById('result-icon');
+            const title = document.getElementById('result-title');
+            const message = document.getElementById('result-message');
+            const explanationText = document.getElementById('explanation-text');
+            
+            if (isCorrect) {
+                icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                icon.className = 'result-icon correct';
+                title.textContent = '回答正确！';
+                message.textContent = '太棒了，继续保持！';
+            } else {
+                icon.innerHTML = '<i class="fas fa-times-circle"></i>';
+                icon.className = 'result-icon incorrect';
+                title.textContent = '回答错误';
+                message.textContent = '没关系，继续努力！';
+            }
+            
+            explanationText.innerHTML = explanation.replace('\n', '<br>');
+            modal.classList.add('show');
+        }
+
+        // 下一题
+        function nextQuestion() {
+            document.getElementById('result-modal').classList.remove('show');
+            
+            currentQuestion++;
+            if (currentQuestion >= questions.length) {
+                // 测试完成
+                showTestComplete();
+                return;
+            }
+            
+            // 更新进度
+            updateProgress();
+            loadQuestion();
+        }
+
+        // 跳过题目
+        function skipQuestion() {
+            nextQuestion();
+        }
+
+        // 播放发音
+        function playPronunciation() {
+            // 模拟发音播放
+            const button = event.currentTarget;
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 150);
+            
+            console.log('播放发音:', questions[currentQuestion].word);
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = `${currentQuestion + 1}/${questions.length}`;
+        }
+
+        // 更新统计
+        function updateStats() {
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('incorrect-count').textContent = incorrectCount;
+            
+            const total = correctCount + incorrectCount;
+            const accuracy = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        // 计时器
+        function startTimer() {
+            const timer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showTestComplete();
+                }
+            }, 1000);
+        }
+
+        // 测试完成
+        function showTestComplete() {
+            alert('测试完成！\n正确：' + correctCount + '\n错误：' + incorrectCount + '\n准确率：' + Math.round((correctCount / (correctCount + incorrectCount)) * 100) + '%');
+        }
+
+        // 返回
+        function goBack() {
+            if (confirm('确定要退出测试吗？进度将不会保存。')) {
+                console.log('返回上一页');
+            }
+        }
+
+        // 标签栏切换
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            console.log('切换到标签:', tab);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

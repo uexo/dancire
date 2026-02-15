@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单词热 - 智能混合</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tw.build.css">
+  <style>
+    .container{max-width:375px;margin:0 auto;background:#f7f7f7;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.1)}
+    .status{height:44px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:14px}
+    .nav{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #e5e5e5}
+    .chip{padding:8px 12px;border-radius:16px;background:#F3F4F6;color:#374151;margin-right:8px}
+    .chip.active{background:#6D28D9;color:#fff}
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="container">
+    <div class="status">
+      <span>9:41</span><span>智能混合</span><span><i class="fas fa-signal text-xs"></i> <i class="fas fa-wifi text-xs"></i> <i class="fas fa-battery-three-quarters text-xs"></i></span>
+    </div>
+    <div class="nav">
+      <button class="text-gray-600" onclick="safeBack('learning-modes.html')"><i class="fas fa-arrow-left text-lg"></i></button>
+      <div class="flex items-center space-x-2"><span id="libTitle" class="text-sm text-gray-600">中考必备词汇</span><span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-xs" id="progressText">1/20</span></div>
+      <button class="text-gray-600" onclick="switchType()"><i class="fas fa-random text-lg"></i></button>
+    </div>
+    <div class="px-4 py-3 bg-white border-b border-gray-200">
+      <div class="flex items-center justify-between mb-2"><span class="text-sm text-gray-600">学习进度</span><span class="text-sm font-semibold text-purple-600" id="progressPercent">5%</span></div>
+      <div class="progress-brand"><div class="progress-brand-inner transition-all duration-500" style="width:5%" id="progressBar"></div></div>
+    </div>
+    <div class="px-4 py-4">
+      <div class="mb-3">
+        <span class="chip" id="chip-card" onclick="setMode('card')">卡片</span>
+        <span class="chip" id="chip-quiz" onclick="setMode('quiz')">选择题</span>
+        <span class="chip" id="chip-spell" onclick="setMode('spell')">拼写</span>
+        <span class="chip" id="chip-dict" onclick="setMode('dict')">听写</span>
+      </div>
+      <div id="area" class="brand-gradient text-white rounded-2xl p-6 shadow-md min-h-[220px]"></div>
+      <div class="mt-4 grid grid-cols-2 gap-3">
+        <button class="btn-brand w-full" onclick="check()"><i class="fas fa-check mr-2"></i>检查</button>
+        <button class="btn-brand w-full" onclick="next()">下一题<i class="fas fa-arrow-right ml-2"></i></button>
+      </div>
+    </div>
+  </div>
+  <script>
+    function getParam(k){const p=new URLSearchParams(window.location.search);return p.get(k)}
+    function safeBack(u){if(document.referrer&&document.referrer!==window.location.href){history.back()}else{window.location.href=u||'learning-modes.html'}}
+    const words=[
+      {word:'APPLE',meaning:'苹果',example:'I eat an apple.'},
+      {word:'RUN',meaning:'跑',example:'Rabbits run fast.'},
+      {word:'SCHOOL',meaning:'学校',example:'I go to school.'}
+    ]
+    let idx=0;let mode='card';let total=20
+    const lib=getParam('lib');if(lib){document.getElementById('libTitle').textContent=lib}
+    const tp=parseInt(getParam('total')||'',10);if(!isNaN(tp)){total=tp;document.getElementById('progressText').textContent=`1/${total}`}
+    function render(){['chip-card','chip-quiz','chip-spell','chip-dict'].forEach(id=>document.getElementById(id).classList.remove('active'));document.getElementById('chip-'+(mode==='dict'?'dict':mode)).classList.add('active');const w=words[idx%words.length];const area=document.getElementById('area');if(mode==='card'){area.innerHTML=`<div class="text-center"><div class="text-2xl font-bold mb-2">${w.word}</div><div class="text-white/80">${w.meaning}</div><div class="mt-4 bg-white/20 rounded-lg p-3 text-sm">${w.example}</div><div class="mt-4"><button class="badge-brand"><i class='fas fa-volume-up mr-1'></i>发音</button></div></div>`}else if(mode==='quiz'){const opts=[w.word,'TREE','BOOK','CAT'].sort(()=>Math.random()-0.5);area.innerHTML=`<div><div class="text-lg font-semibold mb-3">${w.meaning}对应的英文是？</div><div class="grid grid-cols-2 gap-3">${opts.map(o=>`<button class='btn-brand' onclick='selectOpt("${o}")'>${o}</button>`).join('')}</div></div>`}else if(mode==='spell'){area.innerHTML=`<div class="text-center"><div class="text-sm text-white/80 mb-2">中文释义</div><div class="text-xl font-semibold mb-4">${w.meaning}</div><input id="spellInput" class="w-full rounded-xl px-3 py-2" placeholder="输入英文"/></div>`}else{area.innerHTML=`<div class="text-center"><button class="badge-brand"><i class='fas fa-play mr-1'></i>播放发音</button><div class="mt-4"><input id='dictInput' class='w-full rounded-xl px-3 py-2' placeholder='听写英文'/></div></div>`}}
+    let selected=null
+    function selectOpt(o){selected=o}
+    function setMode(m){mode=m;render()}
+    function switchType(){const arr=['card','quiz','spell','dict'];mode=arr[(arr.indexOf(mode)+1)%arr.length];render()}
+    function updateProgress(){const p=Math.min(100,((idx+1)/total)*100);document.getElementById('progressText').textContent=`${idx+1}/${total}`;document.getElementById('progressPercent').textContent=`${Math.round(p)}%`;document.getElementById('progressBar').style.width=p+'%'}
+    function check(){const w=words[idx%words.length];if(mode==='quiz'){alert(selected===w.word?'回答正确':'回答错误')}else if(mode==='spell'){const v=(document.getElementById('spellInput')||{}).value||'';alert(v.toUpperCase()===w.word?'拼写正确':'拼写错误')}else if(mode==='dict'){const v=(document.getElementById('dictInput')||{}).value||'';alert(v.toUpperCase()===w.word?'听写正确':'听写错误')}else{alert('已记录学习反馈')} }
+    function next(){idx++;if(idx>=total){alert('学习完成');safeBack('learning-modes.html');return}updateProgress();mode=['card','quiz','spell','dict'][Math.floor(Math.random()*4)];render()}
+    render();updateProgress()
+  </script>
+</body>
+</html>

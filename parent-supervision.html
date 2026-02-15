@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家长监督 - 单词热</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tw.build.css">
+  <style>
+    .c{max-width:375px;margin:0 auto;background:#f7f7f7;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.1)}
+    .s{height:44px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:14px}
+    .n{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #e5e5e5}
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="c">
+    <div class="s"><span>9:41</span><span>家长监督</span><span><i class="fas fa-signal text-xs"></i> <i class="fas fa-wifi text-xs"></i> <i class="fas fa-battery-three-quarters text-xs"></i></span></div>
+    <div class="n"><button class="text-gray-600" onclick="safeBack('profile.html')"><i class="fas fa-arrow-left text-lg"></i></button><span class="font-semibold text-gray-800">学习概览</span><div class="w-6"></div></div>
+    <div class="px-4 py-4">
+      <div class="card-brand p-4 mb-4">
+        <div class="flex items-center justify-between mb-2"><span class="font-semibold">孩子学习概览</span><span class="badge-brand">本周</span></div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><div class="text-2xl font-bold text-brand">320</div><div class="text-sm text-gray-600">学习时长(分钟)</div></div>
+          <div><div class="text-2xl font-bold text-brand">82%</div><div class="text-sm text-gray-600">掌握率</div></div>
+          <div><div class="text-2xl font-bold text-brand">5</div><div class="text-sm text-gray-600">连续天数</div></div>
+        </div>
+        <div class="mt-4">
+          <div class="progress-brand"><div class="progress-brand-inner" style="width:82%"></div></div>
+        </div>
+      </div>
+      <div class="card-brand p-4 mb-4">
+        <div class="flex items-center justify-between mb-2"><span class="font-semibold">学习报告</span><span class="text-sm text-gray-500">最近7日</span></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white rounded-xl p-3"><div class="text-sm text-gray-600 mb-1">错词分布</div><div class="text-gray-700">名词 12 动词 9 形容词 5</div></div>
+          <div class="bg-white rounded-xl p-3"><div class="text-sm text-gray-600 mb-1">建议</div><div class="text-gray-700">提高拼写练习频次，听写语速调整为 0.9x</div></div>
+        </div>
+      </div>
+      <div class="card-brand p-4 mb-24">
+        <div class="font-semibold mb-3">家长控制项</div>
+        <div class="flex items-center justify-between mb-3"><div class="flex items-center"><i class="fas fa-bullseye text-brand mr-2"></i><span>每日学习目标</span></div><span class="chip" id="goal">20 词</span></div>
+        <div class="flex items-center justify-between mb-3"><div class="flex items-center"><i class="fas fa-bell text-brand mr-2"></i><span>提醒时间</span></div><span class="chip" id="remind">19:00</span></div>
+        <div class="flex items-center justify-between"><div class="flex items-center"><i class="fas fa-ban text-brand mr-2"></i><span>屏蔽时段</span></div><span class="chip" id="block">22:00-07:00</span></div>
+      </div>
+      <div class="fixed-bottom"><button class="btn-brand w-full" onclick="save()"><i class="fas fa-save mr-2"></i>保存监督设置</button></div>
+    </div>
+  </div>
+  <script>
+    function safeBack(u){if(document.referrer&&document.referrer!==window.location.href){history.back()}else{window.location.href=u||'profile.html'}}
+    function save(){alert('监督设置已保存')}
+  </script>
+</body>
+</html>

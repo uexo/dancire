@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习计划 - 单词热</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tw.build.css">
+  <style>.c{max-width:375px;margin:0 auto;background:#f7f7f7;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.1)}.s{height:44px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:14px}.n{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #e5e5e5}</style>
+</head>
+<body class="bg-gray-100">
+  <div class="c">
+    <div class="s"><span>9:41</span><span>学习计划</span><span><i class="fas fa-signal text-xs"></i> <i class="fas fa-wifi text-xs"></i> <i class="fas fa-battery-three-quarters text-xs"></i></span></div>
+    <div class="n"><button class="text-gray-600" onclick="safeBack('profile.html')"><i class="fas fa-arrow-left text-lg"></i></button><span class="font-semibold text-gray-800">计划设置</span><div class="w-6"></div></div>
+    <div class="px-4 py-4">
+      <div class="card-brand p-4 mb-4">
+        <div class="flex items-center justify-between mb-2"><span class="font-semibold">目标词数</span><span id="targetText">200 词</span></div>
+        <div class="grid grid-cols-4 gap-2"><button class="chip" onclick="setTarget(100)">100</button><button class="chip" onclick="setTarget(200)">200</button><button class="chip" onclick="setTarget(300)">300</button><button class="chip" onclick="setTarget(500)">500</button></div>
+      </div>
+      <div class="card-brand p-4 mb-4">
+        <div class="flex items-center justify-between mb-2"><span class="font-semibold">每日新词</span><span id="dailyText">20 词</span></div>
+        <div class="grid grid-cols-5 gap-2"><button class="chip" onclick="setDaily(10)">10</button><button class="chip" onclick="setDaily(15)">15</button><button class="chip" onclick="setDaily(20)">20</button><button class="chip" onclick="setDaily(25)">25</button><button class="chip" onclick="setDaily(30)">30</button></div>
+      </div>
+      <div class="card-brand p-4 mb-24">
+        <div class="font-semibold mb-2">预计完成时间</div>
+        <div class="bg-white rounded-xl p-3"><div id="estimate" class="text-sm text-gray-700">预计 10 天完成</div><div class="mt-2 progress-brand"><div id="progressPlan" class="progress-brand-inner" style="width:0%"></div></div></div>
+      </div>
+      <div class="fixed-bottom"><button class="btn-brand w-full" onclick="save()"><i class="fas fa-check mr-2"></i>开始计划</button></div>
+    </div>
+  </div>
+  <script>
+    function safeBack(u){if(document.referrer&&document.referrer!==window.location.href){history.back()}else{window.location.href=u||'profile.html'}}
+    let target=200;let daily=20;function setTarget(v){target=v;document.getElementById('targetText').textContent=v+' 词';update()}
+    function setDaily(v){daily=v;document.getElementById('dailyText').textContent=v+' 词';update()}
+    function update(){const days=Math.ceil(target/daily);document.getElementById('estimate').textContent='预计 '+days+' 天完成';const pct=Math.min(100,Math.round((daily/target)*100));document.getElementById('progressPlan').style.width=pct+'%'}
+    function save(){alert('学习计划已创建');safeBack('profile.html')}
+    update()
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>词库详情 - 单词热</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tw.build.css">
+  <style>.c{max-width:375px;margin:0 auto;background:#f7f7f7;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.1)}.s{height:44px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:14px}.n{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #e5e5e5}</style>
+</head>
+<body class="bg-gray-100">
+  <div class="c">
+    <div class="s"><span>9:41</span><span>词库详情</span><span><i class="fas fa-signal text-xs"></i> <i class="fas fa-wifi text-xs"></i> <i class="fas fa-battery-three-quarters text-xs"></i></span></div>
+    <div class="n"><button class="text-gray-600" onclick="safeBack('word-library.html')"><i class="fas fa-arrow-left text-lg"></i></button><span class="font-semibold text-gray-800">词库详情</span><div class="w-6"></div></div>
+    <div class="px-4 py-4">
+      <div class="card-brand p-4 mb-4">
+        <div class="flex items-center justify-between mb-2"><div class="font-semibold" id="libTitle">中考必备词汇</div><span class="badge-brand" id="wordsCount">1200词</span></div>
+        <div class="text-sm text-gray-600">适用年级：初中 • 难度：中等 • 配套教材：人教版</div>
+        <div class="mt-3"><div class="progress-brand"><div class="progress-brand-inner" id="progressBar" style="width:0%"></div></div><div class="text-xs text-gray-600 mt-1" id="progressText">进度 0%</div></div>
+      </div>
+      <div class="card-brand p-4 mb-4">
+        <div class="font-semibold mb-2">示例单词</div>
+        <div class="grid grid-cols-2 gap-3" id="samples"></div>
+      </div>
+      <div class="card-brand p-4 mb-4">
+        <div class="font-semibold mb-2">包含内容</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white rounded-xl p-3"><div class="text-sm text-gray-600 mb-1">学习模式</div><div class="text-gray-700">卡片、选择、拼写、听写、混合</div></div>
+          <div class="bg-white rounded-xl p-3"><div class="text-sm text-gray-600 mb-1">配套资源</div><div class="text-gray-700">发音、例句、图片提示</div></div>
+        </div>
+      </div>
+      <div class="card-brand p-4 mb-4">
+        <div class="font-semibold mb-2">AI练习推荐</div>
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-700">基于你的薄弱词与兴趣，推荐智能混合练习</div>
+          <button class="btn-brand" onclick="goMode('learning-mixed.html')"><i class="fas fa-random mr-2"></i>开始</button>
+        </div>
+      </div>
+      <div class="card-brand p-4 mb-24">
+        <div class="font-semibold mb-2">相关练习入口</div>
+        <div class="grid grid-cols-2 gap-3">
+          <button class="btn-brand" onclick="goMode('learning.html')"><i class="fas fa-clone mr-2"></i>卡片学习</button>
+          <button class="btn-brand" onclick="goMode('learning-quiz.html')"><i class="fas fa-check-circle mr-2"></i>选择题</button>
+          <button class="btn-brand" onclick="goMode('learning-spelling.html')"><i class="fas fa-keyboard mr-2"></i>拼写练习</button>
+          <button class="btn-brand" onclick="goMode('learning-dictation.html')"><i class="fas fa-headphones mr-2"></i>听写练习</button>
+          <button class="btn-brand col-span-2" onclick="goMode('learning-mixed.html')"><i class="fas fa-random mr-2"></i>智能混合</button>
+        </div>
+      </div>
+      <div class="fixed-bottom"><div class="grid grid-cols-2 gap-3"><button class="btn-brand" onclick="start()"><i class="fas fa-play mr-2"></i>开始学习</button><button class="btn-brand" onclick="gotoCatalog()"><i class="fas fa-list-ul mr-2"></i>查看目录</button></div></div>
+      <div class="card-brand p-4 mb-24">
+        <div class="font-semibold mb-2">相关练习入口</div>
+        <div class="grid grid-cols-2 gap-3">
+          <button class="btn-brand" onclick="goMode('learning.html')"><i class="fas fa-clone mr-2"></i>卡片学习</button>
+          <button class="btn-brand" onclick="goMode('learning-quiz.html')"><i class="fas fa-check-circle mr-2"></i>选择题</button>
+          <button class="btn-brand" onclick="goMode('learning-spelling.html')"><i class="fas fa-keyboard mr-2"></i>拼写练习</button>
+          <button class="btn-brand" onclick="goMode('learning-dictation.html')"><i class="fas fa-headphones mr-2"></i>听写练习</button>
+          <button class="btn-brand col-span-2" onclick="goMode('learning-mixed.html')"><i class="fas fa-random mr-2"></i>智能混合</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <script>
+    function safeBack(u){if(document.referrer&&document.referrer!==window.location.href){history.back()}else{window.location.href=u||'word-library.html'}}
+    function qp(k){const p=new URLSearchParams(window.location.search);return p.get(k)||''}
+    function init(){const lib=qp('lib')||'中考必备词汇';document.getElementById('libTitle').textContent=lib;document.getElementById('wordsCount').textContent=lib.includes('动物')?'200词':'1200词';const samples=[{w:'APPLE',m:'苹果'},{w:'RUN',m:'跑'},{w:'SCHOOL',m:'学校'},{w:'BEAUTIFUL',m:'美丽的'}];document.getElementById('samples').innerHTML=samples.map(s=>`<div class='bg-white rounded-xl p-3'><div class='font-semibold'>${s.w}</div><div class='text-sm text-gray-600'>${s.m}</div></div>`).join('')}
+    function start(){const lib=qp('lib')||'中考必备词汇';window.location.href='learning-modes.html?lib='+encodeURIComponent(lib)}
+    function gotoCatalog(){const lib=qp('lib')||'中考必备词汇';window.location.href='word-catalog.html?lib='+encodeURIComponent(lib)}
+    function goMode(path){const lib=qp('lib')||'中考必备词汇';window.location.href=path+'?lib='+encodeURIComponent(lib)+'&total=20'}
+    init()
+  </script>
+</body>
+</html>

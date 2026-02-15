@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>成就中心 - 单词热</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>.c{max-width:375px;margin:0 auto;background:#f7f7f7;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.1)}.s{height:44px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:14px}.n{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #e5e5e5}</style>
+</head>
+<body class="bg-gray-100">
+  <div class="c">
+    <div class="s"><span>9:41</span><span>成就中心</span><span><i class="fas fa-signal text-xs"></i> <i class="fas fa-wifi text-xs"></i> <i class="fas fa-battery-three-quarters text-xs"></i></span></div>
+    <div class="n"><button class="text-gray-600" onclick="safeBack('profile.html')"><i class="fas fa-arrow-left text-lg"></i></button><span class="font-semibold text-gray-800">徽章与奖励</span><div class="w-6"></div></div>
+    <div class="px-4 py-4">
+      <div class="grid grid-cols-3 gap-3">
+        <div class="text-center"><div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-1"><i class="fas fa-trophy text-white"></i></div><div class="text-xs">连击达人</div><div class="badge-brand mt-1">已解锁</div></div>
+        <div class="text-center"><div class="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-1 opacity-50"><i class="fas fa-brain text-white"></i></div><div class="text-xs">记忆大师</div><div class="chip mt-1">未解锁</div></div>
+        <div class="text-center"><div class="w-16 h-16 bg-gradient-to-r from-green-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-1 opacity-50"><i class="fas fa-clock text-white"></i></div><div class="text-xs">时间管理</div><div class="chip mt-1">未解锁</div></div>
+      </div>
+      <div class="card-brand p-4 mt-4">
+        <div class="font-semibold mb-2">成就进度</div>
+        <div class="progress-brand"><div class="progress-brand-inner" style="width:60%"></div></div>
+        <div class="text-sm text-gray-600 mt-1">已解锁 12/20</div>
+      </div>
+      <div class="fixed-bottom"><button class="btn-brand w-full" onclick="share()"><i class="fas fa-share mr-2"></i>分享成就</button></div>
+    </div>
+  </div>
+  <script>function safeBack(u){if(document.referrer&&document.referrer!==window.location.href){history.back()}else{window.location.href=u||'profile.html'}}function share(){alert('已分享成就')}
+  </script>
+</body>
+</html>

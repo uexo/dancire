@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>词库选择 - 单词热</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tw.build.css">
+    <style>
+        /* 微信小程序风格样式 */
+        .miniprogram-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background: rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .nav-bar {
+            height: 44px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            position: relative;
+        }
+        
+        .library-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .library-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        
+        .library-card.selected {
+            border: 2px solid #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8edff 100%);
+        }
+        
+        .category-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            margin: 0 4px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .category-tab.active {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .floating-button {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .floating-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="miniprogram-container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>单词热</span>
+            <div class="flex items-center space-x-1">
+                <i class="fas fa-signal text-xs"></i>
+                <i class="fas fa-wifi text-xs"></i>
+                <i class="fas fa-battery-three-quarters text-xs"></i>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="nav-bar">
+            <button onclick="goBack()" class="flex items-center text-gray-600">
+                <i class="fas fa-chevron-left mr-2"></i>
+                返回
+            </button>
+            <div class="absolute left-1/2 transform -translate-x-1/2 font-semibold text-gray-800">
+                选择词库
+            </div>
+        </div>
+
+        <!-- AI推荐横幅 -->
+        <div class="mx-4 mt-4 mb-2">
+            <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-4 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-20 h-20 bg-white bg-opacity-10 rounded-full -mr-10 -mt-10"></div>
+                <div class="absolute bottom-0 left-0 w-16 h-16 bg-white bg-opacity-10 rounded-full -ml-8 -mb-8"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-magic mr-2"></i>
+                        <span class="font-bold">AI智能推荐</span>
+                    </div>
+                    <p class="text-sm opacity-90 mb-3">基于你的学习水平，为你推荐最适合的词库</p>
+                    <button class="bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm font-medium hover:bg-opacity-30 transition-all" onclick="switchToCategory('ai')">
+                        查看推荐 <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分类标签 -->
+        <div class="flex justify-center py-4 px-4">
+            <button class="category-tab active" onclick="switchCategory('grade')">按年级</button>
+            <button class="category-tab" onclick="switchCategory('textbook')">同步教材</button>
+            <button class="category-tab" onclick="switchCategory('theme')">主题词库</button>
+            <button class="category-tab" onclick="switchCategory('exam')">考试专区</button>
+            <button class="category-tab" onclick="switchCategory('ai')">AI推荐</button>
+        </div>
+
+        <!-- 词库列表 -->
+        <div class="px-2 pb-20">
+            <!-- 按年级分类 -->
+            <div id="grade-libraries" class="library-category">
+                <!-- 小学词库 -->
+                <div class="library-card" onclick="selectLibrary(this, 'primary-1')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">小学一年级</h3>
+                                <p class="text-gray-500 text-sm">基础词汇 • 120个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <div class="flex text-yellow-400 text-xs">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span class="text-gray-400 text-xs ml-2">适合初学者</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+50经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="progress-ring relative">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="30" cy="30" r="25" stroke="#e5e7eb" stroke-width="4" fill="none"/>
+                                    <circle cx="30" cy="30" r="25" stroke="#10b981" stroke-width="4" fill="none" 
+                                            stroke-dasharray="157" stroke-dashoffset="94" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-gray-700">40%</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">48/120</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 小学三年级 -->
+                <div class="library-card" onclick="selectLibrary(this, 'primary-3')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">小学三年级</h3>
+                                <p class="text-gray-500 text-sm">进阶词汇 • 300个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <div class="flex text-yellow-400 text-xs">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                    <span class="text-gray-400 text-xs ml-2">有一定基础</span>
+                                    <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs ml-2">+80经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="progress-ring relative">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="30" cy="30" r="25" stroke="#e5e7eb" stroke-width="4" fill="none"/>
+                                    <circle cx="30" cy="30" r="25" stroke="#3b82f6" stroke-width="4" fill="none" 
+                                            stroke-dasharray="157" stroke-dashoffset="125" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-gray-700">20%</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">60/300</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 小学五年级 -->
+                <div class="library-card" onclick="selectLibrary(this, 'primary-5')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">小学五年级</h3>
+                                <p class="text-gray-500 text-sm">提升词汇 • 500个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <div class="flex text-yellow-400 text-xs">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                    <span class="text-gray-400 text-xs ml-2">进阶学习</span>
+                                    <span class="bg-cyan-100 text-cyan-600 px-2 py-1 rounded-full text-xs ml-2">+120经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="progress-ring relative">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="30" cy="30" r="25" stroke="#e5e7eb" stroke-width="4" fill="none"/>
+                                    <circle cx="30" cy="30" r="25" stroke="#06b6d4" stroke-width="4" fill="none" 
+                                            stroke-dasharray="157" stroke-dashoffset="157" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-gray-700">0%</span>
+                                </div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">0/500</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 初中词库 -->
+                <div class="library-card" onclick="selectLibrary(this, 'junior-1')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-tree"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">初中一年级</h3>
+                                <p class="text-gray-500 text-sm">核心词汇 • 800个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <div class="flex text-yellow-400 text-xs">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                    <span class="text-gray-400 text-xs ml-2">中等难度</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="progress-ring relative">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="30" cy="30" r="25" stroke="#e5e7eb" stroke-width="4" fill="none"/>
+                                    <circle cx="30" cy="30" r="25" stroke="#8b5cf6" stroke-width="4" fill="none" 
+                                            stroke-dasharray="157" stroke-dashoffset="157" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-gray-700">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 高中词库 -->
+                <div class="library-card" onclick="selectLibrary(this, 'senior-1')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-yellow-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">高中一年级</h3>
+                                <p class="text-gray-500 text-sm">高级词汇 • 1500个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <div class="flex text-yellow-400 text-xs">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </div>
+                                    <span class="text-gray-400 text-xs ml-2">高级难度</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="progress-ring relative">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="30" cy="30" r="25" stroke="#e5e7eb" stroke-width="4" fill="none"/>
+                                    <circle cx="30" cy="30" r="25" stroke="#ef4444" stroke-width="4" fill="none" 
+                                            stroke-dasharray="157" stroke-dashoffset="157" stroke-linecap="round"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-sm font-bold text-gray-700">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 按教材分类 -->
+            <div id="textbook-libraries" class="library-category hidden">
+                <!-- 教材同步说明 -->
+                <div class="mx-2 mb-4 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-sync-alt text-blue-500 mr-2"></i>
+                        <span class="font-bold text-blue-700">教材同步学习</span>
+                    </div>
+                    <p class="text-sm text-blue-600">与课堂教学完全同步，巩固课堂知识，提升学习效果</p>
+                </div>
+
+                <div class="library-card" onclick="selectLibrary(this, 'pep-3')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">人教版 PEP 三年级上册</h3>
+                                <p class="text-gray-500 text-sm">同步教材 • 6个单元 • 240个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs">同步课堂</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+80经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 mb-1">Unit 3/6</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-1/2 h-full bg-blue-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="library-card" onclick="selectLibrary(this, 'pep-4')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">人教版 PEP 四年级上册</h3>
+                                <p class="text-gray-500 text-sm">同步教材 • 6个单元 • 320个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs">同步课堂</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+100经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 mb-1">未开始</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-0 h-full bg-indigo-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="library-card" onclick="selectLibrary(this, 'oxford-primary')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">牛津小学英语 3A</h3>
+                                <p class="text-gray-500 text-sm">经典教材 • 8个单元 • 350个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full text-xs">国际标准</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+110经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 mb-1">Unit 2/8</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-1/4 h-full bg-emerald-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="library-card" onclick="selectLibrary(this, 'waiyan-junior')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-rose-400 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">外研版初中英语七年级上</h3>
+                                <p class="text-gray-500 text-sm">同步教材 • 10个模块 • 800个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-rose-100 text-rose-600 px-2 py-1 rounded-full text-xs">初中必备</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+200经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 mb-1">未开始</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-0 h-full bg-rose-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 按主题分类 -->
+            <div id="theme-libraries" class="library-category hidden">
+                <div class="library-card" onclick="selectLibrary(this, 'animals')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-paw"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">动物世界</h3>
+                                <p class="text-gray-500 text-sm">趣味主题 • 80个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs">趣味学习</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="library-card" onclick="selectLibrary(this, 'food')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-rose-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">美食天地</h3>
+                                <p class="text-gray-500 text-sm">生活词汇 • 60个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-pink-100 text-pink-600 px-2 py-1 rounded-full text-xs">生活实用</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 考试专区 -->
+            <div id="exam-libraries" class="library-category hidden">
+                <div class="library-card" onclick="selectLibrary(this, 'cet4')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">中考必备词汇</h3>
+                                <p class="text-gray-500 text-sm">考试重点 • 1200个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-violet-100 text-violet-600 px-2 py-1 rounded-full text-xs">考试必备</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="library-card" onclick="selectLibrary(this, 'gaokao')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">高考核心词汇</h3>
+                                <p class="text-gray-500 text-sm">高考冲刺 • 3500个单词</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-amber-100 text-amber-600 px-2 py-1 rounded-full text-xs">高考冲刺</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+500经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 mb-1">未开始</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-0 h-full bg-amber-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI推荐分类 -->
+            <div id="ai-libraries" class="library-category hidden">
+                <!-- AI推荐说明 -->
+                <div class="mx-2 mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-brain text-purple-500 mr-2"></i>
+                        <span class="font-bold text-purple-700">AI智能推荐</span>
+                    </div>
+                    <p class="text-sm text-purple-600">基于你的学习水平、兴趣偏好和学习目标，AI为你精选最适合的词库</p>
+                </div>
+
+                <!-- 推荐词库 -->
+                <div class="library-card border-2 border-purple-200" onclick="selectLibrary(this, 'ai-recommended-1')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center text-white text-xl mr-4 relative">
+                                <i class="fas fa-star"></i>
+                                <div class="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-crown text-xs text-white"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">AI推荐：小学四年级综合</h3>
+                                <p class="text-gray-500 text-sm">匹配度98% • 400个单词 • 预计15天完成</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-xs">AI推荐</span>
+                                    <span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-xs ml-2">最佳匹配</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+120经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-purple-600 font-bold mb-1">98%匹配</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-full h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="library-card" onclick="selectLibrary(this, 'ai-recommended-2')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">AI推荐：动物主题强化</h3>
+                                <p class="text-gray-500 text-sm">匹配度85% • 120个单词 • 预计5天完成</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs">兴趣匹配</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+60经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-blue-600 font-bold mb-1">85%匹配</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-5/6 h-full bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="library-card" onclick="selectLibrary(this, 'ai-recommended-3')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-white text-xl mr-4">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-lg">AI推荐：薄弱词汇专项</h3>
+                                <p class="text-gray-500 text-sm">匹配度92% • 200个单词 • 针对性提升</p>
+                                <div class="flex items-center mt-1">
+                                    <span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full text-xs">专项提升</span>
+                                    <span class="bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs ml-2">+100经验</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-emerald-600 font-bold mb-1">92%匹配</div>
+                            <div class="w-16 h-2 bg-gray-200 rounded-full">
+                                <div class="w-11/12 h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 浮动按钮 -->
+        <div class="floating-button" onclick="startLearning()">
+            <i class="fas fa-play"></i>
+        </div>
+    </div>
+
+    <script>
+        let selectedLibrary = null;
+
+        function switchCategory(category) {
+            // 更新标签状态
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 显示对应分类
+            document.querySelectorAll('.library-category').forEach(cat => {
+                cat.classList.add('hidden');
+            });
+            document.getElementById(category + '-libraries').classList.remove('hidden');
+        }
+
+        function switchToCategory(category){
+            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'))
+            const map = { grade:'按年级', textbook:'同步教材', theme:'主题词库', exam:'考试专区', ai:'AI推荐' }
+            const label = map[category]
+            document.querySelectorAll('.category-tab').forEach(tab => { if(tab.textContent.trim()===label){ tab.classList.add('active') } })
+            document.querySelectorAll('.library-category').forEach(cat => cat.classList.add('hidden'))
+            const el = document.getElementById(category+'-libraries')
+            if(el){ el.classList.remove('hidden'); el.scrollIntoView({ behavior:'smooth', block:'start' }) }
+        }
+
+        function selectLibrary(element, libraryId) {
+            // 移除之前的选中状态
+            document.querySelectorAll('.library-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // 添加选中状态
+            element.classList.add('selected');
+            selectedLibrary = libraryId;
+
+            // 显示浮动按钮
+            document.querySelector('.floating-button').style.display = 'flex';
+        }
+
+        function startLearning() {
+            if (selectedLibrary) {
+                window.location.href = 'word-detail.html?lib=' + encodeURIComponent(selectedLibrary);
+            } else {
+                alert('请先选择一个词库');
+            }
+        }
+
+        function goBack() {
+            // 返回上一页
+            // window.history.back();
+            alert('返回上一页');
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.floating-button').style.display = 'none';
+            const params = new URLSearchParams(window.location.search)
+            const cat = params.get('category')
+            if(cat){ switchToCategory(cat) }
+        });
+    </script>
+</body>
+</html>

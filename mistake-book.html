@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>错题本 - 单词热</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tw.build.css">
+  <style>.c{max-width:375px;margin:0 auto;background:#f7f7f7;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.1)}.s{height:44px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:14px}.n{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #e5e5e5}</style>
+</head>
+<body class="bg-gray-100">
+  <div class="c">
+    <div class="s"><span>9:41</span><span>错题本</span><span><i class="fas fa-signal text-xs"></i> <i class="fas fa-wifi text-xs"></i> <i class="fas fa-battery-three-quarters text-xs"></i></span></div>
+    <div class="n"><button class="text-gray-600" onclick="safeBack('profile.html')"><i class="fas fa-arrow-left text-lg"></i></button><span class="font-semibold text-gray-800">薄弱强化</span><div class="w-6"></div></div>
+    <div class="px-4 py-4">
+      <div class="card-brand p-4 mb-4">
+        <div class="flex items-center justify-between"><span class="font-semibold">错词列表</span><span class="badge-brand">23 项</span></div>
+      </div>
+      <div id="list"></div>
+      <div class="fixed-bottom"><button class="btn-brand w-full" onclick="practice()"><i class="fas fa-play mr-2"></i>开始强化练习</button></div>
+    </div>
+  </div>
+  <script>
+    function safeBack(u){if(document.referrer&&document.referrer!==window.location.href){history.back()}else{window.location.href=u||'profile.html'}}
+    const words=['ADVENTURE','BEAUTIFUL','CHALLENGE','DEVELOP','EDUCATION','FRIENDSHIP','KNOWLEDGE','HAPPINESS','SUCCESS','MOTIVATION']
+    function render(){const el=document.getElementById('list');el.innerHTML=words.map(w=>`<div class='card-brand p-3 mb-2'><div class='flex items-center justify-between'><div><div class='font-semibold'>${w}</div><div class='text-sm text-gray-600'>最近错误 2 次</div></div><div class='flex items-center space-x-2'><button class='chip' onclick='preview("${w}")'>预览</button><button class='btn-brand' onclick='add("${w}")'>加入练习</button></div></div></div>`).join('')}
+    function preview(w){alert('预览 '+w)}
+    function add(w){alert('已加入强化练习: '+w)}
+    function practice(){alert('开始错词强化练习')}
+    render()
+  </script>
+</body>
+</html>

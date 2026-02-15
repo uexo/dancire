@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 单词热</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tw.build.css">
+    <style>
+        /* 微信小程序风格样式 */
+        .miniprogram-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: #f7f7f7;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+        
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.3);
+            object-fit: cover;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .achievement-badge {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: #2d3436;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 4px;
+            display: inline-block;
+        }
+        
+        .menu-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 8px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .bottom-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 375px;
+            height: 60px;
+            background: white;
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .tab-item.active {
+            color: #667eea;
+        }
+        
+        .tab-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(#667eea 0deg 252deg, #e0e0e0 252deg 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .progress-ring::before {
+            content: '';
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            position: absolute;
+        }
+        
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="miniprogram-container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div class="flex items-center">
+                <i class="fas fa-signal text-sm mr-1"></i>
+                <i class="fas fa-wifi text-sm mr-1"></i>
+                <i class="fas fa-battery-three-quarters text-sm"></i>
+            </div>
+            <div class="font-medium">9:41</div>
+            <div class="flex items-center">
+                <span class="text-xs mr-1">100%</span>
+                <i class="fas fa-battery-full text-sm"></i>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="nav-bar">
+            <span>个人中心</span>
+        </div>
+
+        <!-- 个人信息头部 -->
+        <div class="profile-header relative overflow-hidden">
+            <!-- 装饰性背景元素 -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-4 -translate-x-4"></div>
+            
+            <div class="flex items-center mb-4 relative z-10">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face" 
+                         alt="用户头像" class="avatar mr-4">
+                    <!-- 等级徽章 -->
+                    <div class="absolute -bottom-1 -right-1 bg-yellow-400 rounded-full w-8 h-8 flex items-center justify-center border-2 border-white">
+                        <span class="text-xs font-bold text-gray-800">15</span>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center mb-1">
+                        <h2 class="text-xl font-bold mr-2">学习达人</h2>
+                        <i class="fas fa-dragon text-yellow-300 text-lg"></i>
+                    </div>
+                    <p class="text-white/80 text-sm mb-2">已学习 128 天 • 连续打卡 15 天</p>
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-white/20 rounded-full px-3 py-1 text-xs flex items-center">
+                            <i class="fas fa-crown mr-1 text-yellow-300"></i>
+                            Lv.15 词汇大师
+                        </div>
+                        <div class="bg-white/20 rounded-full px-3 py-1 text-xs">
+                            <i class="fas fa-fire mr-1 text-orange-300"></i>
+                            2,450 EXP
+                        </div>
+                    </div>
+                    <!-- 经验值进度条 -->
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-white/80 mb-1">
+                            <span>距离下一级</span>
+                            <span>2,450 / 3,000 EXP</span>
+                        </div>
+                        <div class="w-full bg-white/20 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-yellow-300 to-orange-300 h-2 rounded-full relative" style="width: 82%">
+                                <div class="absolute right-0 top-0 w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 学习统计卡片 -->
+        <div class="stats-card">
+            <h3 class="text-lg font-bold mb-4 text-gray-800">学习统计</h3>
+            <div class="grid grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="progress-ring mx-auto mb-2">
+                        <div class="progress-text">70%</div>
+                    </div>
+                    <p class="text-xs text-gray-600">今日进度</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600 mb-1">1,248</div>
+                    <p class="text-xs text-gray-600">已掌握词汇</p>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600 mb-1">128</div>
+                    <p class="text-xs text-gray-600">连续学习天数</p>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-gray-600">本周学习时长</span>
+                    <span class="text-sm font-semibold text-blue-600">12小时30分</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">距离周目标还差3小时</p>
+            </div>
+        </div>
+
+        <!-- 成就展示 -->
+        <div class="stats-card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-800">成就系统</h3>
+                <button class="text-blue-600 text-sm font-medium">查看全部</button>
+            </div>
+            
+            <!-- 最新解锁成就 -->
+            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-3 mb-4 border border-yellow-200">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-trophy text-white text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-gray-800 text-sm">🎉 新成就解锁！</h4>
+                        <p class="text-xs text-gray-600">连续学习15天 - 获得200经验值</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-orange-600 font-medium">+200 EXP</div>
+                        <div class="text-xs text-gray-500">刚刚</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 成就徽章展示 -->
+            <div class="grid grid-cols-4 gap-3 mb-4">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-red-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <i class="fas fa-fire text-white"></i>
+                    </div>
+                    <p class="text-xs text-gray-600">连击达人</p>
+                    <p class="text-xs text-blue-600 font-medium">15天</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <i class="fas fa-brain text-white"></i>
+                    </div>
+                    <p class="text-xs text-gray-600">记忆大师</p>
+                    <p class="text-xs text-blue-600 font-medium">1248词</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <i class="fas fa-clock text-white"></i>
+                    </div>
+                    <p class="text-xs text-gray-600">时间管理</p>
+                    <p class="text-xs text-blue-600 font-medium">12.5h</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <i class="fas fa-star text-white"></i>
+                    </div>
+                    <p class="text-xs text-gray-600">完美主义</p>
+                    <p class="text-xs text-blue-600 font-medium">95%</p>
+                </div>
+            </div>
+            
+            <!-- 进度中的成就 -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-2">
+                            <i class="fas fa-medal text-gray-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">词汇量突破2000</p>
+                            <p class="text-xs text-gray-500">1248 / 2000</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="w-16 bg-gray-200 rounded-full h-1.5 mb-1">
+                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: 62%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">62%</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-2">
+                            <i class="fas fa-calendar-check text-gray-500 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">连续学习30天</p>
+                            <p class="text-xs text-gray-500">15 / 30</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="w-16 bg-gray-200 rounded-full h-1.5 mb-1">
+                            <div class="bg-orange-500 h-1.5 rounded-full" style="width: 50%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">50%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能菜单 -->
+        <div class="pb-20">
+            <div class="menu-item" onclick="navigateToPage('study-report')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-blue-500 to-blue-600">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">学习报告</h4>
+                        <p class="text-xs text-gray-500">AI智能分析 • 个性化建议</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full mr-2">新</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="navigateToPage('parent-supervision')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-green-500 to-green-600">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">家长监督</h4>
+                        <p class="text-xs text-gray-500">学习进度共享 • 家校互通</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full mr-2">已绑定</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="navigateToPage('achievement-center')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-yellow-500 to-orange-500">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">成就中心</h4>
+                        <p class="text-xs text-gray-500">查看所有成就和奖励</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-orange-100 text-orange-600 text-xs px-2 py-1 rounded-full mr-2">12/20</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="navigateToPage('mistake-book')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-red-500 to-red-600">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">错题本</h4>
+                        <p class="text-xs text-gray-500">智能复习 • 薄弱点强化</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full mr-2">23</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="navigateToPage('study-plan')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-purple-500 to-purple-600">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">学习计划</h4>
+                        <p class="text-xs text-gray-500">AI定制计划 • 科学安排</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-purple-100 text-purple-600 text-xs px-2 py-1 rounded-full mr-2">进行中</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="navigateToPage('word-book')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-indigo-500 to-indigo-600">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">生词本</h4>
+                        <p class="text-xs text-gray-500">收藏重点 • 随时复习</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-indigo-100 text-indigo-600 text-xs px-2 py-1 rounded-full mr-2">156</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="navigateToPage('social-center')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-pink-500 to-pink-600">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">社交中心</h4>
+                        <p class="text-xs text-gray-500">好友互动 • 排行榜挑战</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="bg-pink-100 text-pink-600 text-xs px-2 py-1 rounded-full mr-2">5好友</span>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="navigateToPage('settings')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-gray-500 to-gray-600">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">设置</h4>
+                        <p class="text-xs text-gray-500">个性化设置和偏好</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+
+            <div class="menu-item" onclick="navigateToPage('help')">
+                <div class="flex items-center">
+                    <div class="menu-icon bg-gradient-to-r from-teal-500 to-teal-600">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="font-semibold text-gray-800">帮助与反馈</h4>
+                        <p class="text-xs text-gray-500">使用帮助和意见反馈</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- 底部标签栏 -->
+        <div class="bottom-tabs">
+            <div class="tab-item" onclick="switchTab('home')">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('study')">
+                <i class="fas fa-book"></i>
+                <span>学习</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('wordlib')">
+                <i class="fas fa-bookmark"></i>
+                <span>词库</span>
+            </div>
+            <div class="tab-item active" onclick="switchTab('profile')">
+                <i class="fas fa-user"></i>
+                <span>我的</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 标签栏切换
+        function switchTab(tab) {
+            // 移除所有active类
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 添加active类到当前标签
+            event.currentTarget.classList.add('active');
+            
+            // 这里可以添加页面跳转逻辑
+            console.log('切换到标签:', tab);
+        }
+
+        // 页面导航
+        function navigateToPage(page) {
+            const routes = {
+                'study-report': 'study-report.html',
+                'parent-supervision': 'parent-supervision.html',
+                'achievement-center': 'achievement-center.html',
+                'mistake-book': 'mistake-book.html',
+                'social-center': 'social-center.html',
+                'settings': 'settings.html',
+                'study-plan': 'study-plan.html',
+                'word-book': 'word-book.html',
+                'stats-overview': 'stats-overview.html',
+                'word-catalog': 'word-catalog.html'
+            };
+            const menuItem = event.currentTarget;
+            menuItem.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                menuItem.style.transform = 'scale(1)';
+                const url = routes[page];
+                if (url) {
+                    window.location.href = url;
+                } else {
+                    alert('该原型即将上线');
+                }
+            }, 150);
+        }
+
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    item.style.transition = 'all 0.5s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // 统计数据动画
+        function animateStats() {
+            const progressRing = document.querySelector('.progress-ring');
+            const progressText = document.querySelector('.progress-text');
+            let progress = 0;
+            const target = 70;
+            
+            const interval = setInterval(() => {
+                progress += 2;
+                if (progress >= target) {
+                    progress = target;
+                    clearInterval(interval);
+                }
+                
+                progressText.textContent = progress + '%';
+                const degrees = (progress / 100) * 360;
+                progressRing.style.background = `conic-gradient(#667eea 0deg ${degrees}deg, #e0e0e0 ${degrees}deg 360deg)`;
+            }, 50);
+        }
+
+        // 页面加载完成后启动动画
+        window.addEventListener('load', () => {
+            setTimeout(animateStats, 500);
+        });
+    </script>
+</body>
+</html>

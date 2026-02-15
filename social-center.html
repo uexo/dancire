@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社交中心 - 单词热</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="tw.build.css">
+  <style>.c{max-width:375px;margin:0 auto;background:#f7f7f7;min-height:100vh;box-shadow:0 0 20px rgba(0,0,0,0.1)}.s{height:44px;background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 15px;font-size:14px}.n{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 15px;border-bottom:1px solid #e5e5e5}</style>
+</head>
+<body class="bg-gray-100">
+  <div class="c">
+    <div class="s"><span>9:41</span><span>社交中心</span><span><i class="fas fa-signal text-xs"></i> <i class="fas fa-wifi text-xs"></i> <i class="fas fa-battery-three-quarters text-xs"></i></span></div>
+    <div class="n"><button class="text-gray-600" onclick="safeBack('profile.html')"><i class="fas fa-arrow-left text-lg"></i></button><span class="font-semibold text-gray-800">好友与排行榜</span><div class="w-6"></div></div>
+    <div class="px-4 py-4">
+      <div class="card-brand p-4 mb-4">
+        <div class="flex items-center justify-between mb-2"><span class="font-semibold">好友列表</span><button class="btn-brand" onclick="add()"><i class="fas fa-user-plus mr-2"></i>添加好友</button></div>
+        <div id="friends"></div>
+      </div>
+      <div class="card-brand p-4 mb-24">
+        <div class="flex items-center justify-between mb-2"><span class="font-semibold">排行榜</span><div><span class="chip" onclick="setBoard('week')">周榜</span><span class="chip" onclick="setBoard('month')">月榜</span></div></div>
+        <div id="board"></div>
+      </div>
+      <div class="fixed-bottom"><button class="btn-brand w-full" onclick="share()"><i class="fas fa-share mr-2"></i>分享学习成果</button></div>
+    </div>
+  </div>
+  <script>
+    function safeBack(u){if(document.referrer&&document.referrer!==window.location.href){history.back()}else{window.location.href=u||'profile.html'}}
+    const friends=[{name:'小明',exp:1240},{name:'小红',exp:980},{name:'小刚',exp:860}]
+    const week=[{name:'你',rank:12,exp:2450},{name:'小明',rank:5,exp:3100},{name:'小红',rank:8,exp:2870}]
+    const month=[{name:'你',rank:30,exp:10200},{name:'小明',rank:12,exp:15300},{name:'小红',rank:18,exp:12800}]
+    function renderFriends(){document.getElementById('friends').innerHTML=friends.map(f=>`<div class='flex items-center justify-between py-2'><div><div class='font-semibold'>${f.name}</div><div class='text-xs text-gray-600'>EXP ${f.exp}</div></div><button class='chip'>对战</button></div>`).join('')}
+    function renderBoard(data){document.getElementById('board').innerHTML=data.map(d=>`<div class='flex items-center justify-between py-2'><div class='flex items-center'><span class='badge-brand mr-2'>${d.rank}</span><div><div class='font-semibold'>${d.name}</div><div class='text-xs text-gray-600'>EXP ${d.exp}</div></div></div><button class='chip'>关注</button></div>`).join('')}
+    function setBoard(t){renderBoard(t==='week'?week:month)}
+    function add(){alert('好友请求已发送')}
+    function share(){alert('已分享学习成果')}
+    renderFriends();setBoard('week')
+  </script>
+</body>
+</html>

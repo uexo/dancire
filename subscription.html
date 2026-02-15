@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员订阅 - 单词热</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tw.build.css">
+    <style>
+        /* 微信小程序风格样式 */
+        .miniprogram-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: #f7f7f7;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .status-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-bar {
+            height: 44px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 0 15px;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+        }
+        
+        .hero-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .hero-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .features-section {
+            background: white;
+            margin: 20px;
+            border-radius: 16px;
+            padding: 25px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .features-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+        
+        .feature-content {
+            flex: 1;
+        }
+        
+        .feature-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .feature-desc {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+        
+        .plans-section {
+            margin: 20px;
+        }
+        
+        .plans-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .plan-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .plan-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+        
+        .plan-card.popular {
+            position: relative;
+            border-color: #f59e0b;
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #f59e0b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .plan-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .plan-price {
+            text-align: right;
+        }
+        
+        .price-current {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .price-original {
+            font-size: 14px;
+            color: #9ca3af;
+            text-decoration: line-through;
+            margin-left: 8px;
+        }
+        
+        .price-period {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+        
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .plan-features li i {
+            color: #10b981;
+            margin-right: 10px;
+            width: 16px;
+        }
+        
+        .discount-banner {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            margin: 20px;
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: white;
+            text-align: center;
+        }
+        
+        .discount-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .discount-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .subscribe-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+            margin: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        .subscribe-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .subscribe-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .terms-section {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .terms-text {
+            font-size: 12px;
+            color: #9ca3af;
+            line-height: 1.5;
+        }
+        
+        .terms-link {
+            color: #667eea;
+            text-decoration: underline;
+        }
+        
+        .bottom-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 375px;
+            height: 60px;
+            background: white;
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .tab-item.active {
+            color: #667eea;
+        }
+        
+        .tab-item i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        
+        .payment-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .payment-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 20px;
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        
+        .payment-modal.show .payment-content {
+            transform: scale(1);
+        }
+        
+        .payment-methods {
+            margin: 20px 0;
+        }
+        
+        .payment-method {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method.selected {
+            border-color: #667eea;
+            background: #f8faff;
+        }
+        
+        .payment-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .wechat-pay {
+            background: #07c160;
+            color: white;
+        }
+        
+        .alipay {
+            background: #1677ff;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="miniprogram-container">
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div class="flex items-center">
+                <i class="fas fa-signal text-sm mr-1"></i>
+                <i class="fas fa-wifi text-sm mr-1"></i>
+                <i class="fas fa-battery-three-quarters text-sm"></i>
+            </div>
+            <div class="font-medium">9:41</div>
+            <div class="flex items-center">
+                <span class="text-xs mr-1">100%</span>
+                <i class="fas fa-battery-full text-sm"></i>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="nav-bar">
+            <div class="flex items-center">
+                <i class="fas fa-arrow-left mr-3 cursor-pointer" onclick="goBack()"></i>
+                <span>会员订阅</span>
+            </div>
+            <div class="flex items-center">
+                <i class="fas fa-question-circle cursor-pointer" onclick="showHelp()"></i>
+            </div>
+        </div>
+
+        <!-- 英雄区域 -->
+        <div class="hero-section">
+            <div class="hero-icon">
+                <i class="fas fa-crown"></i>
+                <!-- 装饰性元素 -->
+                <div class="absolute top-4 left-4 w-2 h-2 bg-yellow-300 rounded-full opacity-60 animate-pulse"></div>
+                <div class="absolute top-8 right-6 w-1 h-1 bg-white rounded-full opacity-80 animate-ping"></div>
+                <div class="absolute bottom-6 left-8 w-1.5 h-1.5 bg-yellow-200 rounded-full opacity-70 animate-bounce"></div>
+            </div>
+            <div class="hero-title">🎯 升级为VIP会员</div>
+            <div class="hero-subtitle">解锁专属特权，开启高效学习之旅<br>
+                <span class="text-yellow-200 font-semibold">💎 当前等级：普通用户 → VIP会员</span>
+            </div>
+            <!-- 会员等级进度 -->
+            <div class="mt-4 bg-white bg-opacity-20 rounded-full p-3">
+                <div class="flex items-center justify-between text-sm mb-2">
+                    <span>🥉 普通用户</span>
+                    <span>👑 VIP会员</span>
+                </div>
+                <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-yellow-400 h-2 rounded-full w-3/4 animate-pulse"></div>
+                </div>
+                <div class="text-center text-xs mt-2 text-yellow-200">升级即可获得 +500 经验值</div>
+            </div>
+        </div>
+
+        <!-- 限时优惠横幅 -->
+        <div class="discount-banner">
+            <div class="flex items-center justify-center mb-2">
+                <i class="fas fa-fire text-red-300 mr-2 animate-bounce"></i>
+                <div class="discount-text">🎉 限时优惠 首月仅需9.9元</div>
+                <i class="fas fa-fire text-red-300 ml-2 animate-bounce"></i>
+            </div>
+            <div class="discount-desc">新用户专享，立省20元 + 赠送200经验值</div>
+            <!-- 倒计时 -->
+            <div class="mt-2 text-sm bg-white bg-opacity-20 rounded-lg px-3 py-1 inline-block">
+                ⏰ 优惠剩余时间：23:45:32
+            </div>
+        </div>
+
+        <!-- 会员特权 -->
+        <div class="features-section">
+            <div class="features-title">🌟 VIP会员专享特权</div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-infinity"></i>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-name">无限学习次数 <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full ml-2">热门</span></div>
+                    <div class="feature-desc">不限制每日学习单词数量，随心所欲学习<br>
+                        <span class="text-blue-600 text-xs">💎 每日额外获得 +50 经验值</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-name">全部词库解锁 <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full ml-2">价值¥199</span></div>
+                    <div class="feature-desc">包含托福、雅思、GRE等50+专业词库<br>
+                        <span class="text-blue-600 text-xs">🎯 解锁专属VIP词库和AI定制词汇</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-name">AI学习报告 <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full ml-2">独家</span></div>
+                    <div class="feature-desc">专业的AI学习数据分析和个性化建议<br>
+                        <span class="text-blue-600 text-xs">🤖 每周生成专属学习优化方案</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-name">离线学习模式</div>
+                    <div class="feature-desc">下载词库，随时随地学习，支持离线复习<br>
+                        <span class="text-blue-600 text-xs">📱 支持最多下载10个词库包</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-name">专属游戏模式 <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full ml-2">新功能</span></div>
+                    <div class="feature-desc">VIP专属挑战关卡和竞技模式<br>
+                        <span class="text-blue-600 text-xs">🏆 参与排行榜竞争，赢取丰厚奖励</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-ad"></i>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-name">去除广告</div>
+                    <div class="feature-desc">享受纯净的学习体验，专注提升效率<br>
+                        <span class="text-blue-600 text-xs">✨ 节省30%学习时间</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-name">专属客服 + 学习顾问</div>
+                    <div class="feature-desc">1对1专属客服 + AI学习顾问指导<br>
+                        <span class="text-blue-600 text-xs">👨‍🏫 每月免费1次专家咨询</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="feature-content">
+                    <div class="feature-name">VIP社交特权</div>
+                    <div class="feature-desc">专属VIP群组，与优秀学习者交流<br>
+                        <span class="text-blue-600 text-xs">👥 加入500+VIP学习社群</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订阅方案 -->
+        <div class="plans-section">
+            <div class="plans-title">💎 选择您的VIP方案</div>
+            
+            <!-- 体验方案 -->
+            <div class="plan-card" onclick="selectPlan('trial')" data-plan="trial">
+                <div class="plan-header">
+                    <div class="plan-name">🎁 体验会员</div>
+                    <div class="plan-price">
+                        <span class="price-current">¥9.9</span>
+                        <span class="price-original">¥29</span>
+                        <div class="price-period">首月体验价</div>
+                    </div>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i>7天免费试用</li>
+                    <li><i class="fas fa-check"></i>基础VIP特权</li>
+                    <li><i class="fas fa-check"></i>赠送200经验值</li>
+                    <li><i class="fas fa-check"></i>随时取消订阅</li>
+                </ul>
+            </div>
+            
+            <!-- 月度方案 -->
+            <div class="plan-card" onclick="selectPlan('monthly')" data-plan="monthly">
+                <div class="plan-header">
+                    <div class="plan-name">📅 月度VIP</div>
+                    <div class="plan-price">
+                        <span class="price-current">¥29</span>
+                        <span class="price-original">¥39</span>
+                        <div class="price-period">每月自动续费</div>
+                    </div>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i>所有VIP特权</li>
+                    <li><i class="fas fa-check"></i>每月赠送500经验值</li>
+                    <li><i class="fas fa-check"></i>专属月度徽章</li>
+                    <li><i class="fas fa-check"></i>灵活订阅管理</li>
+                </ul>
+            </div>
+            
+            <!-- 年度方案 -->
+            <div class="plan-card popular selected" onclick="selectPlan('yearly')" data-plan="yearly">
+                <div class="popular-badge">🔥 最受欢迎</div>
+                <div class="plan-header">
+                    <div class="plan-name">🏆 年度VIP</div>
+                    <div class="plan-price">
+                        <span class="price-current">¥199</span>
+                        <span class="price-original">¥348</span>
+                        <div class="price-period">每年 (平均¥16.6/月)</div>
+                    </div>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i>所有VIP特权</li>
+                    <li><i class="fas fa-check"></i>节省43%费用 (省¥149)</li>
+                    <li><i class="fas fa-check"></i>赠送5000经验值</li>
+                    <li><i class="fas fa-check"></i>专属年度成就徽章</li>
+                    <li><i class="fas fa-check"></i>优先体验新功能</li>
+                    <li><i class="fas fa-check"></i>免费获得学习资料包</li>
+                </ul>
+            </div>
+            
+            <!-- 终身方案 -->
+            <div class="plan-card" onclick="selectPlan('lifetime')" data-plan="lifetime">
+                <div class="plan-header">
+                    <div class="plan-name">👑 终身VIP</div>
+                    <div class="plan-price">
+                        <span class="price-current">¥599</span>
+                        <span class="price-original">¥999</span>
+                        <div class="price-period">一次付费，终身享受</div>
+                    </div>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i>所有VIP特权</li>
+                    <li><i class="fas fa-check"></i>永久免费更新</li>
+                    <li><i class="fas fa-check"></i>赠送10000经验值</li>
+                    <li><i class="fas fa-check"></i>专属终身VIP标识</li>
+                    <li><i class="fas fa-check"></i>独家学习资料库</li>
+                    <li><i class="fas fa-check"></i>终身免费专家咨询</li>
+                    <li><i class="fas fa-check"></i>优先客服支持</li>
+                </ul>
+            </div>
+
+            <!-- 价值对比 -->
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mt-4">
+                <div class="text-center text-sm font-semibold text-gray-700 mb-3">💰 价值对比分析</div>
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div class="text-center">
+                        <div class="font-semibold text-blue-600">月度VIP</div>
+                        <div class="text-gray-600">¥29/月</div>
+                        <div class="text-gray-500">年费¥348</div>
+                    </div>
+                    <div class="text-center bg-yellow-100 rounded-lg p-2">
+                        <div class="font-semibold text-orange-600">年度VIP</div>
+                        <div class="text-orange-600">¥199/年</div>
+                        <div class="text-green-600 font-semibold">省¥149</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="font-semibold text-purple-600">终身VIP</div>
+                        <div class="text-purple-600">¥599</div>
+                        <div class="text-green-600 font-semibold">省¥400+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 订阅按钮 -->
+        <button class="subscribe-button btn-brand" onclick="showPayment()" style="margin-bottom: 100px;">
+            <i class="fas fa-crown mr-2"></i>
+            立即订阅年度会员 ¥199
+        </button>
+
+        <!-- 服务条款 -->
+        <div class="terms-section">
+            <div class="terms-text">
+                点击订阅即表示您同意我们的
+                <a href="#" class="terms-link">服务条款</a> 和 
+                <a href="#" class="terms-link">隐私政策</a><br>
+                订阅将自动续费，您可以随时在设置中取消
+            </div>
+        </div>
+
+        <!-- 底部标签栏 -->
+        <div class="bottom-tabs">
+            <div class="tab-item" onclick="switchTab('home')">
+                <i class="fas fa-home"></i>
+                <span>首页</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('study')">
+                <i class="fas fa-book"></i>
+                <span>学习</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('wordlib')">
+                <i class="fas fa-bookmark"></i>
+                <span>词库</span>
+            </div>
+            <div class="tab-item active" onclick="switchTab('profile')">
+                <i class="fas fa-user"></i>
+                <span>我的</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 支付方式弹窗 -->
+    <div class="payment-modal" id="payment-modal">
+        <div class="payment-content">
+            <h3 class="text-xl font-bold mb-4">选择支付方式</h3>
+            <p class="text-gray-600 mb-4">年度会员 ¥199</p>
+            
+            <div class="payment-methods">
+                <div class="payment-method selected" onclick="selectPayment('wechat')" data-payment="wechat">
+                    <div class="payment-icon wechat-pay">
+                        <i class="fab fa-weixin"></i>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <div class="font-semibold">微信支付</div>
+                        <div class="text-sm text-gray-500">推荐使用</div>
+                    </div>
+                    <i class="fas fa-check-circle text-blue-500"></i>
+                </div>
+                
+                <div class="payment-method" onclick="selectPayment('alipay')" data-payment="alipay">
+                    <div class="payment-icon alipay">
+                        <i class="fab fa-alipay"></i>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <div class="font-semibold">支付宝</div>
+                        <div class="text-sm text-gray-500">安全便捷</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button class="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold" onclick="closePayment()">
+                    取消
+                </button>
+                <button class="flex-2 btn-brand text-white py-3 px-4 rounded-lg font-semibold" onclick="processPayment()">
+                    确认支付
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedPlan = 'yearly';
+        let selectedPayment = 'wechat';
+
+        // 选择订阅方案
+        function selectPlan(planType) {
+            // 移除所有选中状态
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // 选中当前方案
+            document.querySelector(`[data-plan="${planType}"]`).classList.add('selected');
+            selectedPlan = planType;
+            
+            // 更新按钮文本
+            updateSubscribeButton();
+        }
+
+        // 更新订阅按钮
+        function updateSubscribeButton() {
+            const button = document.querySelector('.subscribe-button');
+            const plans = {
+                trial: { name: '体验会员', price: '¥9.9' },
+                monthly: { name: '月度VIP', price: '¥29' },
+                yearly: { name: '年度VIP', price: '¥199' },
+                lifetime: { name: '终身VIP', price: '¥599' }
+            };
+            
+            const plan = plans[selectedPlan];
+            button.innerHTML = `<i class="fas fa-crown mr-2"></i>立即订阅${plan.name} ${plan.price}`;
+        }
+
+        // 显示支付弹窗
+        function showPayment() {
+            const modal = document.getElementById('payment-modal');
+            modal.classList.add('show');
+            
+            // 更新支付金额
+            const plans = {
+                monthly: '¥29',
+                yearly: '¥199', 
+                lifetime: '¥599'
+            };
+            
+            const planNames = {
+                monthly: '月度会员',
+                yearly: '年度会员',
+                lifetime: '终身会员'
+            };
+            
+            modal.querySelector('p').textContent = `${planNames[selectedPlan]} ${plans[selectedPlan]}`;
+        }
+
+        // 关闭支付弹窗
+        function closePayment() {
+            document.getElementById('payment-modal').classList.remove('show');
+        }
+
+        // 选择支付方式
+        function selectPayment(paymentType) {
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.classList.remove('selected');
+            });
+            
+            document.querySelector(`[data-payment="${paymentType}"]`).classList.add('selected');
+            selectedPayment = paymentType;
+        }
+
+        // 处理支付
+        function processPayment() {
+            // 模拟支付处理
+            const button = event.currentTarget;
+            button.disabled = true;
+            button.textContent = '处理中...';
+            
+            setTimeout(() => {
+                closePayment();
+                showSuccessMessage();
+                button.disabled = false;
+                button.innerHTML = '确认支付';
+            }, 2000);
+        }
+
+        // 显示成功消息
+        function showSuccessMessage() {
+            alert('🎉 订阅成功！\n感谢您成为会员，现在可以享受所有特权功能了！');
+        }
+
+        // 显示帮助
+        function showHelp() {
+            alert('💡 会员帮助\n\n• 订阅后立即生效\n• 支持随时取消\n• 如有问题请联系客服\n• 客服微信：wordshot_help');
+        }
+
+        // 返回
+        function goBack() {
+            console.log('返回上一页');
+        }
+
+        // 标签栏切换
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            console.log('切换到标签:', tab);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSubscribeButton();
+        });
+    </script>
+</body>
+</html>
